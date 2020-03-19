@@ -8,16 +8,17 @@ export interface Repos {
   [key: string]: Repo
 }
 
-export interface Change {
+export interface CodeChange {
   user_name: string,
   user_email: string,
   time: number
+  file: string
 }
 
 export interface Repo {
   url: string,
   files: {
-    [key:string]: Array<Change>
+    [key:string]: Array<CodeChange>
   }
 }
 

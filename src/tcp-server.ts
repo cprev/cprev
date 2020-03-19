@@ -55,6 +55,17 @@ const s = net.createServer(s => {
       });
     }
 
+
+    doWrite(s, {
+      error: `no task matched type: '${d.type}'`
+    });
+
   });
 
+});
+
+const tcpPort = 3046;
+
+s.listen(tcpPort, () => {
+  console.log('tcp server listening on port:', tcpPort);
 });

@@ -1,6 +1,6 @@
 'use strict';
 
-import {ChangePayload, ResultCallback} from "./types";
+import {ChangePayload, CodeChange, ResultCallback} from "./types";
 import {repos} from "./cache";
 
 export function onRead (b: ChangePayload, cb: ResultCallback)  {
@@ -43,6 +43,27 @@ export function onRead (b: ChangePayload, cb: ResultCallback)  {
       result: 'no conflicts'
     });
   }
+
+  const set = new Set();
+
+  const conflicts = lst.reduceRight((a, b) => {
+
+    if (a.length > 3) {
+      return a;
+    }
+
+    if (!set.has(b.user_email)) {
+      a.push(b);
+    }
+
+    return a;
+
+  }, [] as Array<CodeChange>);
+
+  return cb({
+    result: 'conflict',
+    conflicts
+  });
 
 
 }
