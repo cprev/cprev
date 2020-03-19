@@ -3,9 +3,9 @@
 import {ChangePayload, CodeChange, ResultCallback} from "./types";
 import {repos} from "./cache";
 
-export function onRead (b: ChangePayload, cb: ResultCallback)  {
+export function onRead(b: ChangePayload, cb: ResultCallback) {
 
-  if(!repos[b.repo]){
+  if (!repos[b.repo]) {
     repos[b.repo] = {
       url: b.repo,
       files: {}
@@ -14,7 +14,7 @@ export function onRead (b: ChangePayload, cb: ResultCallback)  {
 
   const repo = repos[b.repo];
 
-  if(!repo.files[b.file]){
+  if (!repo.files[b.file]) {
     repo.files[b.file] = [];
   }
 
@@ -22,9 +22,9 @@ export function onRead (b: ChangePayload, cb: ResultCallback)  {
 
   const now = Date.now();
 
-  while(true) {
+  while (true) {
     const first = lst[0];
-    if(first && now - first.time > 24*60*60){
+    if (first && now - first.time > 24 * 60 * 60) {
       lst.shift();
       continue;
     }
@@ -38,7 +38,7 @@ export function onRead (b: ChangePayload, cb: ResultCallback)  {
     time: now
   });
 
-  if(!mostRecent){
+  if (!mostRecent) {
     return cb({
       result: 'no conflicts'
     });
@@ -64,6 +64,5 @@ export function onRead (b: ChangePayload, cb: ResultCallback)  {
     result: 'conflict',
     conflicts
   });
-
 
 }
