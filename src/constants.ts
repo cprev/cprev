@@ -13,8 +13,17 @@ export const tcpServerPort = 3046;
 export const ignoredPaths = [
   '/node_modules/',
   '/.git/',
+  '/.idea/',
+  '/.vscode/',
   `${process.env.GOPATH}/pkg`,
 ];
 
-
 export const ignorePathsRegex = ignoredPaths.map(v => new RegExp(v, 'i'));
+
+//
+//
+//
+//
+//
+//
+//

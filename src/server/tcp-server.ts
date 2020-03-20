@@ -68,12 +68,16 @@ export const tcpServer = net.createServer(s => {
       });
     }
 
+    log.error('e0a00403-74b0-4fc9-bf94-a305bef71c68: no task matched type:', d.type);
+
     doWrite(s, {
       errId: 'd2fd1c06-66c4-4b74-b56a-e11eac1a85ce',
       error: `no task matched type: '${d.type}'`
     });
 
   });
+
+  //////////////
 
 });
 

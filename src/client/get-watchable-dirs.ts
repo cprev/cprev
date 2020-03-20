@@ -17,7 +17,15 @@ export type EVCb<T, E = any> = (err?: E, val?: T) => void;
 
 type Task = (cb: EVCb<any>) => void;
 
+let callable = true;
+
 export const getWatchableDirs = (config: Config, cb: EVCb<Array<WatchDir>>) => {
+
+  if(!callable){
+    throw 'Why call me twice?'
+  }
+
+  callable = false;
 
   const paths = flattenDeep([config.codeRoots]).map(v => path.resolve(v));
 

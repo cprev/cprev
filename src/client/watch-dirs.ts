@@ -20,11 +20,20 @@ const doWrite = (s: net.Socket, v: ChangePayload) => {
 };
 
 
-//
+let callable = true;
+
 export const watchDirs = (dirs: Array<WatchDir>) => {
 
+
+  if(!callable){
+    return;
+  }
+
+  callable = false;
+
   const timers = new Map();
-  //
+
+  console.log('dirs.length:', dirs.length);
 
   for (const i of dirs) {
     fs.watch(i.dirpath, (event: string, filename: string) => {

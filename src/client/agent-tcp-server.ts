@@ -45,8 +45,10 @@ export const agentTcpServer = net.createServer(s => {
       return doWrite(s, {error: 'missing repo'});
     }
 
+    log.error('8fe8e800-1525-4870-930b-2eeec3c42fbd: no task matched type:', d.type);
+
     doWrite(s, {
-      error: `no task matched type: '${d.type}'`
+      error: `fc892414-4e91-456c-a6ef-55ef1bfcc92c: no task matched type: '${d.type}'`
     });
 
   });
