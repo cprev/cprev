@@ -2,13 +2,11 @@
 
 import * as net from 'net';
 import JSONParser from "@oresoftware/json-stream-parser";
-import {ChangePayload, ReadPayload} from "./types";
-import {onChange} from "./on-change";
-import {onRead} from "./on-read";
+import {ChangePayload, ReadPayload} from "../types";
 import * as path from "path";
 import * as fs from 'fs';
 import log from 'bunion';
-import {localAgentSocketPath} from "./constants";
+import {localAgentSocketPath} from "../constants";
 
 export const connections = new Set<net.Socket>();
 
@@ -81,17 +79,7 @@ const s = net.createServer(s => {
       return doWrite(s, {error: 'missing repo'});
     }
 
-    if (d.type === 'change') {
-      return onChange(d.val as ChangePayload, v => {
-        doWrite(s, v);
-      });
-    }
 
-    if (d.type === 'read') {
-      return onRead(d.val as ReadPayload, v => {
-        doWrite(s, v);
-      });
-    }
 
 
     doWrite(s, {

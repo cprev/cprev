@@ -1,7 +1,7 @@
 'use strict';
 
-export interface ResultCallback {
-  (val: any): void;
+export interface ResultCallback<T = any> {
+  (val: T): void;
 }
 
 export interface Repos {

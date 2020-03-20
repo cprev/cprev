@@ -1,6 +1,6 @@
 'use strict';
 
-import {CodeChange, ChangePayload, ResultCallback} from "./types";
+import {CodeChange, ChangePayload, ResultCallback} from "../types";
 import {repos} from "./cache";
 
 export function onChange(b: ChangePayload, cb: ResultCallback) {

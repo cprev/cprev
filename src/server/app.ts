@@ -1,13 +1,10 @@
 'use strict';
 
-
 import * as express from 'express';
 import * as bodyParser from "body-parser";
-import {ChangePayload, ReadPayload, Repos} from "./types";
+import {ChangePayload, ReadPayload, Repos} from "../types";
 import {onChange} from './on-change';
 import {onRead} from "./on-read";
-
-
 
 //TODO: the IDE should show when/who the opened file was last modified by someone else on the team
 

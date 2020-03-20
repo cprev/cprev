@@ -1,6 +1,6 @@
 'use strict';
 
-import {ChangePayload, CodeChange, ResultCallback} from "./types";
+import {ChangePayload, CodeChange, ResultCallback} from "../types";
 import {repos} from "./cache";
 
 export function onRead(b: ChangePayload, cb: ResultCallback) {

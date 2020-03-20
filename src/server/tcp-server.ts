@@ -2,7 +2,7 @@
 
 import * as net from 'net';
 import JSONParser from "@oresoftware/json-stream-parser";
-import {ChangePayload, ReadPayload} from "./types";
+import {ChangePayload, ReadPayload} from "../types";
 import {onChange} from "./on-change";
 import {onRead} from "./on-read";
 
