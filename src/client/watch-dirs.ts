@@ -14,8 +14,6 @@ const doWrite = (s: net.Socket, v: ChangePayload) => {
 
 export const watchDirs = (dirs: Array<WatchDir>) => {
 
-  let watchCount = 0;
-
   const timers = new Map();
 
   for (const i of dirs) {
@@ -24,7 +22,10 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
       log.info('filesystem event:', event, filename);
 
       //we have a timer for each file
-      clearTimeout(timers.get(filename));
+      if(timers.has(filename)){
+        clearTimeout(timers.get(filename));
+      }
+
       timers.set(filename, setTimeout(() => {
 
         if (i.git_repo) {
@@ -58,13 +59,16 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
         });
 
         k.once('exit', code => {
+          ///
+
           if (code && code > 0) {
-            log.error('git/bash child process exited with non zero code.');
-            log.error(d.stderr);
+            log.error('33e68dd9-5842-41c2-83e0-65d43e68cb27: git/bash child process exited with non zero code.');
+            log.error('058b717c-94a3-49a9-b6e3-a162beb9d96b: stderr:',d.stderr);
             return;
           }
 
           if(!(d.stdout && d.stdout.startsWith('/'))){
+            log.warn('715b9f6e-7119-43ae-9a02-9b0c8c1f52dc: Not a filepath:', d.stdout);
             return;
           }
 
@@ -72,12 +76,12 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
             var stats = fs.statSync(d.stdout);
           }
           catch(err){
-            log.error('Could not stat this path:', d.stdout);
+            log.error('8781b643-b682-4e0b-a29b-931ce7df7376: Could not stat this path:', d.stdout);
             return;
           }
 
           if(!stats.isDirectory()){
-            log.error('The stats call says this is not a git dir:', d.stdout);
+            log.error('954d918f-826f-4524-a7e0-683ea32e4208: The stats call says this is not a git dir:', d.stdout);
             return;
           }
 
