@@ -38,7 +38,7 @@ const makeNewConnection = () => {
   });
 
   conn.once('connect', () => {
-    log.info('agent has connected to server via tcp:', c.httpServerHost, c.httpServerPort);
+    log.info('agent connected to server via tcp:', c.httpServerHost, c.httpServerPort);
   });
 
   conn.once('error', e => {

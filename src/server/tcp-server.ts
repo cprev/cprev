@@ -7,6 +7,12 @@ import {onChange} from "./on-change";
 import {onRead} from "./on-read";
 import log from 'bunion';
 
+
+if (require.main === module){
+  log.error('757b18f0-9a5e-481b-91a8-9dee60df4ac0:', 'cannot run the file directly - use main.js.');
+  process.exit(1);
+}
+
 export const connections = new Set<net.Socket>();
 
 export interface SocketMessage {
