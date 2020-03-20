@@ -5,6 +5,7 @@ import JSONParser from "@oresoftware/json-stream-parser";
 import {ChangePayload, ReadPayload} from "../types";
 import {onChange} from "./on-change";
 import {onRead} from "./on-read";
+import log from 'bunion';
 
 export const connections = new Set<net.Socket>();
 
@@ -22,18 +23,18 @@ export const tcpServer = net.createServer(s => {
   connections.add(s);
 
   s.once('error', e => {
-    console.error('socket conn error: ', e);
+    log.error('6f955362-4aec-4841-ba57-c98cd30cd2b5:','socket conn error: ', e);
     s.removeAllListeners();
     connections.delete(s);
   });
 
   s.once('disconnect', () => {
-    console.log('connection disconnected.');
+    log.info('6f955362-4aec-4841-ba57-c98cd30cd2b5:','connection disconnected.');
     connections.delete(s);
   });
 
   s.once('end', () => {
-    console.log('connection ended.');
+    log.info('c25f6ed5-a3c6-494e-9493-c2a945bac335:','connection ended.');
     connections.delete(s);
   });
 
@@ -57,6 +58,7 @@ export const tcpServer = net.createServer(s => {
 
 
     doWrite(s, {
+      errId: 'd2fd1c06-66c4-4b74-b56a-e11eac1a85ce',
       error: `no task matched type: '${d.type}'`
     });
 

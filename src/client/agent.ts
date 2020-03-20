@@ -6,7 +6,14 @@ import {ChangePayload, ReadPayload} from "../types";
 import * as path from "path";
 import * as fs from 'fs';
 import log from 'bunion';
+import * as c from '../constants';
 import {localAgentSocketPath} from "../constants";
+
+
+if (require.main === module){
+  log.error('8224ed20-4d86-471f-9dae-e51d37b82cc8:', 'cannot run the agent.js file directly - use main.js.');
+  process.exit(1);
+}
 
 export const connections = new Set<net.Socket>();
 
@@ -20,32 +27,42 @@ const doWrite = (s: net.Socket, v: any) => {
 };
 
 const cache = {
-  conn: <unknown> null as net.Socket
+  conn: <unknown>null as net.Socket
 };
 
 const makeNewConnection = () => {
 
-  const conn = cache.conn =  net.createConnection({
-    port: 3118,
-    host: 'localhost'
+  const conn = cache.conn = net.createConnection({
+    port: c.httpServerPort,
+    host: c.httpServerHost
+  });
+
+  conn.once('connect', () => {
+    log.info('agent has connected to server via tcp:', c.httpServerHost, c.httpServerPort);
   });
 
   conn.once('error', e => {
-    console.error('socket conn error: ', e);
-    s.removeAllListeners();
-    makeNewConnection();
+    log.error('0996b105-0a2d-4fa6-a67d-ff7853ff0133:', 'socket conn error: ', e);
+    conn.removeAllListeners();
+    setTimeout(() => {
+      makeNewConnection();
+    }, 2000);
   });
 
   conn.once('disconnect', () => {
-    s.removeAllListeners();
-    console.log('connection disconnected.');
-    makeNewConnection();
+    conn.removeAllListeners();
+    log.info('996d5da1-1a73-40d7-a38d-043f13c8a5f1:', 'connection disconnected.');
+    setTimeout(() => {
+      makeNewConnection();
+    }, 10);
   });
 
   conn.once('end', () => {
-    s.removeAllListeners();
-    console.log('connection ended.');
-    makeNewConnection();
+    conn.removeAllListeners();
+    log.info('d63a8250-a062-4117-bc2e-1f2d39295328:', 'connection ended.');
+    setTimeout(() => {
+      makeNewConnection();
+    }, 10);
   });
 
   return conn;
@@ -53,23 +70,23 @@ const makeNewConnection = () => {
 
 cache.conn = makeNewConnection();
 
-const s = net.createServer(s => {
+export const agentTcpServer = net.createServer(s => {
 
   connections.add(s);
 
   s.once('error', e => {
-    console.error('socket conn error: ', e);
+    log.error('08e3add4-b9ec-418e-b255-d0afd0a2ec50:', 'socket conn error: ', e);
     s.removeAllListeners();
     connections.delete(s);
   });
 
   s.once('disconnect', () => {
-    console.log('connection disconnected.');
+    log.info('19588471-b830-4f99-bfa0-0048cd3a905d:', 'connection disconnected.');
     connections.delete(s);
   });
 
   s.once('end', () => {
-    console.log('connection ended.');
+    log.info('cc06fa58-519f-4743-b211-c826bd085b58:', 'connection ended.');
     connections.delete(s);
   });
 
@@ -78,9 +95,6 @@ const s = net.createServer(s => {
     if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
       return doWrite(s, {error: 'missing repo'});
     }
-
-
-
 
     doWrite(s, {
       error: `no task matched type: '${d.type}'`
@@ -92,21 +106,3 @@ const s = net.createServer(s => {
 
 
 
-try{
-  fs.unlinkSync(localAgentSocketPath)
-}
-catch(err){
-  log.warn('Could not unlink file:', localAgentSocketPath);
-}
-
-try{
-  fs.mkdirSync(path.dirname(localAgentSocketPath), {recursive: true});
-}
-catch(err){
-  log.error('Could not create dir:', path.dirname(localAgentSocketPath));
-  process.exit(1);
-}
-
-s.listen(localAgentSocketPath, () => {
-  log.info('agent socket server listening on path:', localAgentSocketPath);
-});
