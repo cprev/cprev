@@ -15,20 +15,31 @@ if (require.main === module){
   process.exit(1);
 }
 
-export const connections = new Set<net.Socket>();
+
 
 export interface SocketMessage {
   type: 'read' | 'change',
   val: ReadPayload | ChangePayload
 }
 
-const doWrite = (s: net.Socket, v: any) => {
-  s.write(JSON.stringify({val: v}) + '\n');
-};
 
 const cache = {
   conn: <unknown>null as net.Socket
 };
+
+export const getConnection = () : Promise<net.Socket> => {
+  return new Promise((resolve => {
+
+    if(cache.conn && cache.conn.writable){
+      return resolve(cache.conn);
+    }
+
+    makeNewConnection().once('connect', () => {
+       resolve(cache.conn);
+    })
+  }));
+};
+
 
 const makeNewConnection = () => {
 
@@ -70,39 +81,7 @@ const makeNewConnection = () => {
 
 cache.conn = makeNewConnection();
 
-export const agentTcpServer = net.createServer(s => {
 
-  connections.add(s);
-
-  s.once('error', e => {
-    log.error('08e3add4-b9ec-418e-b255-d0afd0a2ec50:', 'socket conn error: ', e);
-    s.removeAllListeners();
-    connections.delete(s);
-  });
-
-  s.once('disconnect', () => {
-    log.info('19588471-b830-4f99-bfa0-0048cd3a905d:', 'connection disconnected.');
-    connections.delete(s);
-  });
-
-  s.once('end', () => {
-    log.info('cc06fa58-519f-4743-b211-c826bd085b58:', 'connection ended.');
-    connections.delete(s);
-  });
-
-  s.pipe(new JSONParser()).on('data', (d: SocketMessage) => {
-
-    if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
-      return doWrite(s, {error: 'missing repo'});
-    }
-
-    doWrite(s, {
-      error: `no task matched type: '${d.type}'`
-    });
-
-  });
-
-});
 
 
 

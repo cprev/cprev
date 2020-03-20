@@ -4,19 +4,40 @@ import log from "bunion";
 import * as fs from "fs";
 import {localAgentSocketPath} from "../constants";
 import * as path from "path";
-import {agentTcpServer} from './agent'
+import {agentTcpServer} from './agent-tcp-server'
+import {getWatchableDirs} from "./get-watchable-dirs";
 
-try{
+import config from '../.cprev.conf.js';
+import {watchDirs} from "./watch-dirs";
+
+export type Config = typeof config
+
+getWatchableDirs(config, (err, dirs) => {
+
+  if (err) {
+    log.error('4585a17b-a478-4ba0-beca-c0702d0983ea:', err);
+    process.exit(1);
+  }
+
+  if (!(dirs && dirs.length > 0)) {
+    log.error('cfe59e4a-8b5c-4cfd-ab7d-6fdec27e39a6:', err);
+    process.exit(1);
+  }
+
+  watchDirs(dirs);
+});
+
+try {
   fs.unlinkSync(localAgentSocketPath)
 }
-catch(err){
+catch (err) {
   log.warn('Could not unlink file:', localAgentSocketPath);
 }
 
-try{
+try {
   fs.mkdirSync(path.dirname(localAgentSocketPath), {recursive: true});
 }
-catch(err){
+catch (err) {
   log.error('Could not create dir:', path.dirname(localAgentSocketPath));
   process.exit(1);
 }
@@ -24,7 +45,6 @@ catch(err){
 agentTcpServer.listen(localAgentSocketPath, () => {
   log.info('agent socket server listening on path:', localAgentSocketPath);
 });
-
 
 process.once('SIGTERM', () => {
 

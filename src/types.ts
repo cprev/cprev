@@ -18,7 +18,7 @@ export interface CodeChange {
 export interface Repo {
   url: string,
   files: {
-    [key:string]: Array<CodeChange>
+    [key: string]: Array<CodeChange>
   }
 }
 
@@ -34,4 +34,9 @@ export interface ReadPayload {
   file: string,
   user_name: string,
   user_email: string
+}
+
+export interface WatchDir {
+  dirpath: string,
+  git_repo: string
 }
