@@ -1,5 +1,7 @@
 'use strict';
 
+import log from "bunion";
+import * as c from './constants';
 
 export const r2gSmokeTest = function () {
   // r2g command line app uses this exported function
@@ -7,23 +9,45 @@ export const r2gSmokeTest = function () {
 };
 
 import {app} from "./app";
+import {tcpServer} from "./tcp-server";
 
-const port = 3045;
 
-const s = app.listen(port, () => {
-  console.log('server listening on port:', port);
+const tcps = tcpServer.listen(c.tcpServerPort, () => {
+  console.log('tcp server listening on port:', c.tcpServerPort);
+});
+
+tcps.on('error', e => {
+  log.warn('tcp server error:',e);
+});
+
+
+const s = app.listen(c.httpServerPort, () => {
+  console.log('server listening on port:', c.httpServerPort);
 });
 
 process.once('SIGTERM', () => {
+
+  setTimeout(() => {
+    log.warn('server close timed out.');
+    process.exit(1);
+  }, 2000);
+
   s.close(() => {
     process.exit(1)
   });
 });
 
 process.once('SIGINT', () => {
+
+  setTimeout(() => {
+    log.warn('server close timed out.');
+    process.exit(1);
+  }, 2000);
+
   s.close(() => {
     process.exit(1)
   });
+
 });
 
 s.on('error', e => {

@@ -16,7 +16,6 @@ const app = express();
 app.use(bodyParser.json());
 
 
-
 app.post('/read', (req,res) => {
 
   const b = req.body as ReadPayload;
