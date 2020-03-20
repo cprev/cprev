@@ -34,18 +34,23 @@ export const getConnection = () : Promise<net.Socket> => {
       return resolve(cache.conn);
     }
 
-    makeNewConnection().once('connect', () => {
-       resolve(cache.conn);
-    })
+    // makeNewConnection().once('connect', () => {
+    //    resolve(cache.conn);
+    // })
   }));
 };
-
+////
 
 const makeNewConnection = () => {
 
+  if(cache.conn){
+    cache.conn.removeAllListeners();
+    cache.conn.destroy();
+  }
+
   const conn = cache.conn = net.createConnection({
-    port: c.httpServerPort,
-    host: c.httpServerHost
+    port: c.tcpServerPort,
+    host: c.tcpServerHost
   });
 
   conn.once('connect', () => {

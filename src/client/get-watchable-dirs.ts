@@ -31,38 +31,49 @@ export const getWatchableDirs = (config: Config, cb: EVCb<Array<WatchDir>>) => {
   const goThroughDir = (dir: string, isWatchingNow: boolean, relevantGitRepo: string) => {
 
     if (alreadySeen.has(dir)) {
-      return process.nextTick(cb);
+      return;
     }
 
     alreadySeen.add(dir);
 
+
     for (let ignore of ignorePathsRegex) {
+
+      if (ignore.test(path.resolve(dir))) {
+        log.debug('path ignored:', dir);
+        return;
+      }
+
       if (ignore.test(path.resolve(dir + '/'))) {
-        return process.nextTick(cb);
+        log.debug('path ignored:', dir);
+        return;
+      }
+
+      if (ignore.test(path.resolve(dir + '/') + '/')) {
+        log.debug('path ignored:', dir);
+        return;
       }
     }
+
+    // log.warn('dir 1:', dir);
 
     q.push(cb => {
 
       fs.stat(dir, (err, stats) => {
 
         if (err) {
-          log.warn('7ae3f105-a04e-406f-846c-2a45f8515c1b:', err);
+          // log.warn('7ae3f105-a04e-406f-846c-2a45f8515c1b:', err);
           return cb(null);
         }
 
         if (!stats.isDirectory()) {
+          // log.debug('not a directory:', dir);
           return cb(null);
         }
-
-        if (alreadySeen.has(dir)) {
-          return cb(null);
-        }
-
-        alreadySeen.add(dir);
 
         try {
           var cprevjs = require(path.resolve(dir + '/.cprev.js'));
+          log.info(dir, {cprevjs});
           isWatchingNow = true;
         }
         catch (err) {

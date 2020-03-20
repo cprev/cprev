@@ -6,7 +6,13 @@ import JSONParser from "@oresoftware/json-stream-parser";
 import {SocketMessage} from "./agent";
 
 const doWrite = (s: net.Socket, v: any) => {
-  s.write(JSON.stringify({val: v}) + '\n');
+
+  if (!s.writable) {
+    log.warn('3d6e661f-2c6f-4e6e-adeb-0c9729fc2df6: socket is not writable.');
+    return;
+  }
+  log.info("376aa75b-854e-4b67-99d7-55efafe8f7f3 writing payload:", v);
+  s.write(JSON.stringify({val: v}) + '\n', 'utf8');
 };
 
 export const connections = new Set<net.Socket>();
@@ -33,6 +39,7 @@ export const agentTcpServer = net.createServer(s => {
   });
 
   s.pipe(new JSONParser()).on('data', (d: SocketMessage) => {
+  // s.on('data', (d: SocketMessage) => {
 
     if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
       return doWrite(s, {error: 'missing repo'});

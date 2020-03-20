@@ -7,32 +7,44 @@ import * as net from "net";
 import {getConnection} from "./agent";
 import {ChangePayload, WatchDir} from "../types";
 import * as cp from 'child_process';
+import * as path from "path";
 
 const doWrite = (s: net.Socket, v: ChangePayload) => {
-  s.write(JSON.stringify({val: v}) + '\n');
+
+  if (!s.writable) {
+    log.warn('44558c07-2b13-4f9c-9f3c-7e524e11fe07: socket is not writable.');
+    return;
+  }
+  log.info("fb224b51-bb55-45d3-aa46-8f3d2c6ce55d writing payload:", v);
+  s.write(JSON.stringify({val: v}) + '\n', 'utf8');
 };
 
+
+//
 export const watchDirs = (dirs: Array<WatchDir>) => {
 
   const timers = new Map();
+  //
 
   for (const i of dirs) {
     fs.watch(i.dirpath, (event: string, filename: string) => {
 
-      log.info('filesystem event:', event, filename);
+      const fullPath = path.resolve(i.dirpath + '/' + filename);
+
+      log.info('filesystem event:', event, fullPath);
 
       //we have a timer for each file
-      if(timers.has(filename)){
-        clearTimeout(timers.get(filename));
+      if(timers.has(fullPath)){
+        clearTimeout(timers.get(fullPath));
       }
 
-      timers.set(filename, setTimeout(() => {
+      timers.set(fullPath, setTimeout(() => {
 
         if (i.git_repo) {
           return getConnection().then(v => {
             doWrite(v, {
               repo: i.git_repo,
-              file: filename,
+              file: fullPath,
               user_email: 'alex@oresoftware.com',
               user_name: 'alex'
             });
