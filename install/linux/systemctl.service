@@ -1,0 +1,15 @@
+
+[Unit]
+Description=ROT13 demo service
+After=network.target
+StartLimitIntervalSec=1
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=oleg
+ExecStart=/home/oleg/.local/cprev-safe-start
+
+[Install]
+WantedBy=multi-user.target
