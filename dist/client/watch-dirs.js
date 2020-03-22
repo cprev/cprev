@@ -2,9 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const bunion_1 = require("bunion");
-const agent_1 = require("./agent");
+const client_conn_1 = require("./client-conn");
 const cp = require("child_process");
 const path = require("path");
+const uuid = require("uuid");
+const agent_1 = require("./agent");
 const doWrite = (s, v) => {
     if (!s.writable) {
         bunion_1.default.warn('44558c07-2b13-4f9c-9f3c-7e524e11fe07: socket is not writable.');
@@ -14,6 +16,35 @@ const doWrite = (s, v) => {
     s.write(JSON.stringify(v) + '\n', 'utf8');
 };
 let callable = true;
+const hasGitGrandparent = (pth) => {
+    const dirname = path.dirname(pth);
+    if (dirname.endsWith('/.git')) {
+        return true;
+    }
+    if (dirname === pth) {
+        return false;
+    }
+    return hasGitGrandparent(dirname);
+};
+const updateForGit = (fullPath) => {
+    return new Promise((resolve) => {
+        const id = uuid.v4();
+        let timedout = false;
+        const to = setTimeout(() => {
+            timedout = true;
+            agent_1.cache.resolutions.delete(id);
+            resolve(null);
+        }, 1500);
+        agent_1.cache.resolutions.set(id, () => {
+            agent_1.cache.resolutions.delete(id);
+            if (timedout) {
+                return;
+            }
+            clearTimeout(to);
+            resolve(null);
+        });
+    });
+};
 exports.watchDirs = (dirs) => {
     if (!callable) {
         return;
@@ -22,17 +53,23 @@ exports.watchDirs = (dirs) => {
     const timers = new Map();
     console.log('dirs.length:', dirs.length);
     for (const i of dirs) {
+        let p = Promise.resolve();
         fs.watch(i.dirpath, (event, filename) => {
             const fullPath = path.resolve(i.dirpath + '/' + filename);
+            if (hasGitGrandparent(fullPath)) {
+                p = p.then(() => updateForGit(fullPath));
+                return;
+            }
             bunion_1.default.info('filesystem event:', event, fullPath);
             if (timers.has(fullPath)) {
                 clearTimeout(timers.get(fullPath));
             }
             timers.set(fullPath, setTimeout(() => {
                 if (i.git_repo) {
-                    return agent_1.getConnection().then(v => {
+                    return client_conn_1.getConnection().then(v => {
                         doWrite(v, {
                             type: event === 'change' ? 'change' : 'read',
+                            reqUuid: uuid.v4(),
                             val: {
                                 repo: i.git_repo,
                                 file: fullPath,
@@ -77,9 +114,10 @@ exports.watchDirs = (dirs) => {
                         bunion_1.default.error('954d918f-826f-4524-a7e0-683ea32e4208: The stats call says this is not a git dir:', d.stdout);
                         return;
                     }
-                    agent_1.getConnection().then(v => {
+                    client_conn_1.getConnection().then(v => {
                         doWrite(v, {
                             type: event === 'change' ? 'change' : 'read',
+                            reqUuid: uuid.v4(),
                             val: {
                                 repo: i.git_repo,
                                 file: fullPath,

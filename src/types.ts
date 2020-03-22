@@ -23,8 +23,9 @@ export interface Repo {
 }
 
 export interface SocketMessage {
-  type: 'read' | 'change',
-  val: ReadPayload | ChangePayload
+  type: 'read' | 'change' | 'git',
+  reqUuid: string,
+  val: ReadPayload | ChangePayload | GitPayload
 }
 
 export interface ChangePayload {
@@ -32,6 +33,14 @@ export interface ChangePayload {
   file: string,
   user_name: string,
   user_email: string
+}
+
+export interface GitPayload {
+  repo: string,
+  branch: string,
+  trackedFiles: {
+    [key:string]: true
+  }
 }
 
 export interface ReadPayload {

@@ -4,10 +4,13 @@ import Timer = NodeJS.Timer;
 import * as fs from 'fs';
 import log from "bunion";
 import * as net from "net";
-import {getConnection} from "./agent";
+import {getConnection} from "./client-conn";
 import {ChangePayload, SocketMessage, WatchDir} from "../types";
 import * as cp from 'child_process';
 import * as path from "path";
+import {dir} from "async";
+import * as uuid from 'uuid';
+import {cache} from "./agent";
 
 const doWrite = (s: net.Socket, v: SocketMessage) => {
 
@@ -20,6 +23,43 @@ const doWrite = (s: net.Socket, v: SocketMessage) => {
 };
 
 let callable = true;
+
+const hasGitGrandparent = (pth: string): boolean => {
+  const dirname = path.dirname(pth);
+  if(dirname.endsWith('/.git')){
+    return true;
+  }
+  if(dirname === pth){
+    return false;
+  }
+  return hasGitGrandparent(dirname);
+};
+
+const updateForGit = (fullPath: string) => {
+
+  return new Promise((resolve) => {
+
+    const id = uuid.v4();
+    let timedout = false;
+    const to = setTimeout(() => {
+      timedout = true;
+      cache.resolutions.delete(id);
+      resolve(null);
+    }, 1500);
+
+    cache.resolutions.set(id, () => {
+      cache.resolutions.delete(id);
+      if(timedout){
+        return;
+      }
+      clearTimeout(to);
+
+      resolve(null);
+    });
+
+  });
+};
+
 
 export const watchDirs = (dirs: Array<WatchDir>) => {
 
@@ -34,9 +74,17 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
   console.log('dirs.length:', dirs.length);
 
   for (const i of dirs) {
+
+    let p : Promise<any> = Promise.resolve();
+
     fs.watch(i.dirpath, (event: string, filename: string) => {
 
       const fullPath = path.resolve(i.dirpath + '/' + filename);
+
+      if(hasGitGrandparent(fullPath)){
+         p = p.then(() => updateForGit(fullPath));
+         return;
+      }
 
       log.info('filesystem event:', event, fullPath);
 
@@ -51,6 +99,7 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
           return getConnection().then(v => {
             doWrite(v, {
               type: event === 'change' ? 'change' : 'read',
+              reqUuid: uuid.v4(),
               val: {
                 repo: i.git_repo,
                 file: fullPath,
@@ -110,6 +159,7 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
           getConnection().then(v => {
             doWrite(v, {
               type: event === 'change' ? 'change' : 'read',
+              reqUuid: uuid.v4(),
               val: {
                 repo: i.git_repo,
                 file: fullPath,

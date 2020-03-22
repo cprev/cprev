@@ -9,7 +9,6 @@ exports.httpServerPort = 3045;
 exports.tcpServerPort = 3046;
 exports.ignoredPaths = [
     '/node_modules/',
-    '/.git/',
     '/.idea/',
     '/.vscode/',
     `${process.env.GOPATH}/pkg`,

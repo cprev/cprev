@@ -20,10 +20,9 @@ getWatchableDirs(config, (err, dirs) => {
     process.exit(1);
   }
 
-  log.error('2222',err, dirs);
-
   if (!(dirs && dirs.length > 0)) {
-    log.error('cfe59e4a-8b5c-4cfd-ab7d-6fdec27e39a6:', `No folders to watch - add a ".cprev.js" file to folders within your "codeRoots" property in ".cprev.conf.js"`);
+    log.error('cfe59e4a-8b5c-4cfd-ab7d-6fdec27e39a6:',
+      `No folders to watch - add a ".cprev.js" file to folders within your "codeRoots" property in ".cprev.conf.js"`);
     process.exit(1);
   }
 

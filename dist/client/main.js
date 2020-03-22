@@ -14,7 +14,6 @@ get_watchable_dirs_1.getWatchableDirs(_cprev_conf_js_1.default, (err, dirs) => {
         bunion_1.default.error('4585a17b-a478-4ba0-beca-c0702d0983ea:', err);
         process.exit(1);
     }
-    bunion_1.default.error('2222', err, dirs);
     if (!(dirs && dirs.length > 0)) {
         bunion_1.default.error('cfe59e4a-8b5c-4cfd-ab7d-6fdec27e39a6:', `No folders to watch - add a ".cprev.js" file to folders within your "codeRoots" property in ".cprev.conf.js"`);
         process.exit(1);
