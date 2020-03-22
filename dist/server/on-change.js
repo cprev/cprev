@@ -23,12 +23,25 @@ function onChange(p, cb) {
         }
         break;
     }
+    while (true) {
+        const mostRecent = lst[lst.length - 1];
+        if (mostRecent && mostRecent.user_email === userEmail) {
+            lst.pop();
+            continue;
+        }
+        break;
+    }
     const mostRecent = lst[lst.length - 1];
     lst.push({
         ...p,
         time: now
     });
     if (!mostRecent) {
+        return cb({
+            result: 'no conflicts'
+        });
+    }
+    if (mostRecent.user_email === userEmail) {
         return cb({
             result: 'no conflicts'
         });

@@ -31,6 +31,16 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
     break;
   }
 
+
+  while(true){
+    const mostRecent = lst[lst.length - 1];
+    if (mostRecent && mostRecent.user_email === userEmail) {
+      lst.pop();
+      continue;
+    }
+    break;
+  }
+
   const mostRecent = lst[lst.length - 1];
 
   lst.push({
@@ -44,11 +54,19 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
     });
   }
 
+  if(mostRecent.user_email === userEmail){
+    // current user made the most recent change, so no conflicts
+    return cb({
+      result: 'no conflicts'
+    });
+  }
+
   const set = new Set();  //////
 
   const conflicts = lst.reduceRight((a, b) => {
 
     if (a.length > 3) {
+      // we only send back the 4 most recent changes
       return a;
     }
 
