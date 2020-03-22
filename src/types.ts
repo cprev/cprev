@@ -24,7 +24,8 @@ export interface Repo {
 
 export interface SocketMessage {
   type: 'read' | 'change' | 'git',
-  reqUuid: string,
+  reqUuid?: string,
+  resUuid?: string,
   val: ReadPayload | ChangePayload | GitPayload
 }
 

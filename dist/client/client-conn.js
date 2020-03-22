@@ -4,6 +4,7 @@ const net = require("net");
 const c = require("../constants");
 const bunion_1 = require("bunion");
 const agent_1 = require("./agent");
+const json_stream_parser_1 = require("@oresoftware/json-stream-parser");
 exports.getConnection = () => {
     return new Promise((resolve => {
         if (agent_1.cache.conn && agent_1.cache.conn.writable) {
@@ -22,6 +23,15 @@ const makeNewConnection = () => {
     const conn = agent_1.cache.conn = net.createConnection({
         port: c.tcpServerPort,
         host: c.tcpServerHost
+    });
+    conn.pipe(new json_stream_parser_1.default()).on('data', d => {
+        if (!d.resUuid) {
+            bunion_1.default.info('client conn data:', d);
+            return;
+        }
+        if (agent_1.cache.resolutions.has(d.resUuid)) {
+            agent_1.cache.resolutions.get(d.resUuid)(d);
+        }
     });
     conn.once('connect', () => {
         bunion_1.default.info('agent connected to server via tcp:', c.httpServerHost, c.httpServerPort);

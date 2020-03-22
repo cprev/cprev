@@ -18,7 +18,7 @@ if (require.main === module){
 
 export const cache = {
   conn: <unknown>null as net.Socket,
-  resolutions: new Map<string, () => void>()
+  resolutions: new Map<string, (d : any) => void>()
 };
 
 

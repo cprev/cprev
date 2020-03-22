@@ -6,6 +6,7 @@ import {ChangePayload, ReadPayload, SocketMessage} from "../types";
 import {onChange} from "./on-change";
 import {onRead} from "./on-read";
 import log from 'bunion';
+import * as uuid from 'uuid';
 
 if (require.main === module) {
   log.error('757b18f0-9a5e-481b-91a8-9dee60df4ac0:', 'cannot run the file directly - use main.js.');
@@ -16,13 +17,14 @@ export const connections = new Set<net.Socket>();
 
 ////
 
-const doWrite = (s: net.Socket, v: any) => {
+const doWrite = (s: net.Socket, resUuid: string | null, v: {reqUuid: string, [key:string]: any}) => {
   if (!s.writable) {
     log.warn('bae5c25d-60c6-4dd5-91af-d993142199ae: socket is not writable.');
     return;
   }
   log.info("5897e002-6690-42b3-8fa3-fa5ec7929541 writing payload:", v);
-  s.write(JSON.stringify({val: v}) + '\n', 'utf8');
+  v.resUuid = resUuid || null;
+  s.write(JSON.stringify(v) + '\n', 'utf8');
 };
 
 export const tcpServer = net.createServer(s => {
@@ -48,26 +50,32 @@ export const tcpServer = net.createServer(s => {
   s.pipe(new JSONParser()).on('data', (d: SocketMessage) => {
   // s.on('data', (d: SocketMessage) => {
 
+    const reqId = d.reqUuid || null;
+
     if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
-      return doWrite(s, {error: 'missing repo'});
+      return doWrite(s, reqId, {
+        error: 'missing repo',
+        reqUuid: uuid.v4()
+        });
     }
 
     if (d.type === 'change') {
       return onChange(d.val as ChangePayload, v => {
-        doWrite(s, v);
+        doWrite(s, reqId, v);
       });
     }
 
     if (d.type === 'read') {
       return onRead(d.val as ReadPayload, v => {
-        doWrite(s, v);
+        doWrite(s, reqId, v);
       });
     }
 
     log.error('e0a00403-74b0-4fc9-bf94-a305bef71c68: no task matched type:', d.type);
 
-    doWrite(s, {
+    doWrite(s, reqId, {
       errId: 'd2fd1c06-66c4-4b74-b56a-e11eac1a85ce',
+      reqUuid: uuid.v4(),
       error: `no task matched type: '${d.type}'`
     });
 

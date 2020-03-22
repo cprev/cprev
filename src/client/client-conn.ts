@@ -2,6 +2,7 @@ import * as net from "net";
 import * as c from "../constants";
 import log from "bunion";
 import {cache} from "./agent";
+import JSONParser from "@oresoftware/json-stream-parser";
 
 export const getConnection = () : Promise<net.Socket> => {
   return new Promise((resolve => {
@@ -26,6 +27,16 @@ const makeNewConnection = () => {
   const conn = cache.conn = net.createConnection({
     port: c.tcpServerPort,
     host: c.tcpServerHost
+  });
+
+  conn.pipe(new JSONParser()).on('data', d => {
+    if(!d.resUuid){
+      log.info('client conn data:', d);
+      return;
+    }
+    if(cache.resolutions.has(d.resUuid)){
+      (cache.resolutions.get(d.resUuid) as any)(d);
+    }
   });
 
   conn.once('connect', () => {
