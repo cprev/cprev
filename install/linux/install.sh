@@ -5,6 +5,9 @@ if [[ $EUID -eq 0 ]]; then
    exit 1
 fi
 
+set -eo pipefail;
+cd "$(dirname "$BASH_SOURCE")"
+
 if [[ "cprev_allow_reinstall" == 'yes' ]]; then
     if [[ -d "$HOME/.cprev/conf" ]]; then
       echo 'Refusing to overwrite existing cprev installation.';
@@ -36,3 +39,5 @@ chmod +x "$HOME/.local/bin/cprev-agent"
 
 ln -sf "$HOME/.cprev/lib/install/linux/start.sh" "$HOME/.local/bin/cprev-safe-start"
 chmod +x "$HOME/.local/bin/cprev-safe-start"
+
+rsync "$PWD/systemctl.service" "/etc/systemd/system/cprev.agent.service"

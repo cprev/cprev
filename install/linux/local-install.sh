@@ -28,8 +28,13 @@ mkdir -p "$HOME/.cprev/sockets"
 ln -sf "$HOME/.cprev/lib/dist/client/main.js" "$HOME/.local/bin/cprev-agent"
 chmod +x "$HOME/.local/bin/cprev-agent"
 
-
 ln -sf "$HOME/.cprev/lib/install/linux/start.sh" "$HOME/.local/bin/cprev-safe-start"
 chmod +x "$HOME/.local/bin/cprev-safe-start"
 
+
+sudo rsync "$PWD/systemd.service" "/etc/systemd/system/cprev.agent.service"
+
 echo 'installed successfully (local installation).';
+
+echo 'To restart the systemd service, use:'
+echo 'systemctl restart cprev.agent.service'
