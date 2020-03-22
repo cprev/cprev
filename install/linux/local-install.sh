@@ -34,6 +34,8 @@ chmod +x "$HOME/.local/bin/cprev-safe-start"
 
 sudo rsync "$PWD/systemd.service" "/etc/systemd/system/cprev.agent.service"
 
+node write-config.js
+
 echo 'installed successfully (local installation).';
 
 echo 'To restart the systemd service, use:'
