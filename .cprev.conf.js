@@ -1,4 +1,4 @@
-
+'use strict';
 
 exports.default = {
   delayOnChange: 2500,

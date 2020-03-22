@@ -31,8 +31,7 @@ try {
     fs.mkdirSync(path.dirname(constants_1.localAgentSocketPath), { recursive: true });
 }
 catch (err) {
-    bunion_1.default.error('Could not create dir:', path.dirname(constants_1.localAgentSocketPath));
-    process.exit(1);
+    bunion_1.default.warn('Could not create dir:', path.dirname(constants_1.localAgentSocketPath));
 }
 agent_tcp_server_1.agentTcpServer.listen(constants_1.localAgentSocketPath, () => {
     bunion_1.default.info('agent socket server listening on path:', constants_1.localAgentSocketPath);

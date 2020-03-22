@@ -31,9 +31,6 @@ exports.agentTcpServer = net.createServer(s => {
         if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
             return doWrite(s, { error: 'missing repo' });
         }
-        bunion_1.default.error('8fe8e800-1525-4870-930b-2eeec3c42fbd: no task matched type:', d.type);
-        doWrite(s, {
-            error: `fc892414-4e91-456c-a6ef-55ef1bfcc92c: no task matched type: '${d.type}'`
-        });
+        bunion_1.default.info('message received on client:', d);
     });
 });

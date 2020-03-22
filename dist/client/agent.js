@@ -15,6 +15,9 @@ exports.getConnection = () => {
         if (cache.conn && cache.conn.writable) {
             return resolve(cache.conn);
         }
+        makeNewConnection().once('connect', () => {
+            resolve(cache.conn);
+        });
     }));
 };
 const makeNewConnection = () => {
@@ -34,21 +37,21 @@ const makeNewConnection = () => {
         conn.removeAllListeners();
         setTimeout(() => {
             makeNewConnection();
-        }, 2000);
+        }, 9000);
     });
     conn.once('disconnect', () => {
         conn.removeAllListeners();
         bunion_1.default.info('996d5da1-1a73-40d7-a38d-043f13c8a5f1:', 'connection disconnected.');
         setTimeout(() => {
             makeNewConnection();
-        }, 10);
+        }, 300);
     });
     conn.once('end', () => {
         conn.removeAllListeners();
         bunion_1.default.info('d63a8250-a062-4117-bc2e-1f2d39295328:', 'connection ended.');
         setTimeout(() => {
             makeNewConnection();
-        }, 10);
+        }, 300);
     });
     return conn;
 };

@@ -41,8 +41,8 @@ try {
   fs.mkdirSync(path.dirname(localAgentSocketPath), {recursive: true});
 }
 catch (err) {
-  log.error('Could not create dir:', path.dirname(localAgentSocketPath));
-  process.exit(1);
+  log.warn('Could not create dir:', path.dirname(localAgentSocketPath));
+  // process.exit(1);
 }
 
 agentTcpServer.listen(localAgentSocketPath, () => {

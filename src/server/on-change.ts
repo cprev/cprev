@@ -3,23 +3,23 @@
 import {CodeChange, ChangePayload, ResultCallback} from "../types";
 import {repos} from "./cache";
 
-export function onChange(b: ChangePayload, cb: ResultCallback) {
+export function onChange(p: ChangePayload, cb: ResultCallback) {
 
-  if (!repos[b.repo]) {
-    repos[b.repo] = {
-      url: b.repo,
+  if (!repos[p.repo]) {
+    repos[p.repo] = {
+      url: p.repo,
       files: {}
     };
   }
 
-  const repo = repos[b.repo];
+  const userEmail = p.user_email;
+  const repo = repos[p.repo];
 
-  if (!repo.files[b.file]) {
-    repo.files[b.file] = [];
+  if (!repo.files[p.file]) {
+    repo.files[p.file] = [];
   }
 
-  const lst = repo.files[b.file];
-
+  const lst = repo.files[p.file];
   const now = Date.now();
 
   while (true) {
@@ -34,7 +34,7 @@ export function onChange(b: ChangePayload, cb: ResultCallback) {
   const mostRecent = lst[lst.length - 1];
 
   lst.push({
-    ...b,
+    ...p,
     time: now
   });
 
@@ -44,11 +44,15 @@ export function onChange(b: ChangePayload, cb: ResultCallback) {
     });
   }
 
-  const set = new Set();
+  const set = new Set();  //////
 
   const conflicts = lst.reduceRight((a, b) => {
 
     if (a.length > 3) {
+      return a;
+    }
+
+    if(b.user_email === userEmail){
       return a;
     }
 
@@ -59,6 +63,14 @@ export function onChange(b: ChangePayload, cb: ResultCallback) {
     return a;
 
   }, [] as Array<CodeChange>);
+
+
+  if (conflicts.length < 1) {
+    return cb({
+      result: 'no conflicts'
+    });
+  }
+
 
   return cb({
     result: 'conflict',

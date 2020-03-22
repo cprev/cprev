@@ -22,6 +22,11 @@ export interface Repo {
   }
 }
 
+export interface SocketMessage {
+  type: 'read' | 'change',
+  val: ReadPayload | ChangePayload
+}
+
 export interface ChangePayload {
   repo: string,
   file: string,

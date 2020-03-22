@@ -2,7 +2,7 @@
 
 import * as net from 'net';
 import JSONParser from "@oresoftware/json-stream-parser";
-import {ChangePayload, ReadPayload} from "../types";
+import {ChangePayload, ReadPayload, SocketMessage} from "../types";
 import {onChange} from "./on-change";
 import {onRead} from "./on-read";
 import log from 'bunion';
@@ -14,10 +14,7 @@ if (require.main === module) {
 
 export const connections = new Set<net.Socket>();
 
-export interface SocketMessage {
-  type: 'read' | 'change',
-  val: ReadPayload | ChangePayload
-}
+////
 
 const doWrite = (s: net.Socket, v: any) => {
   if (!s.writable) {
@@ -37,7 +34,6 @@ export const tcpServer = net.createServer(s => {
     // s.removeAllListeners();
     connections.delete(s);
   });
-
 
   s.once('disconnect', () => {
     log.info('6f955362-4aec-4841-ba57-c98cd30cd2b5:', 'connection disconnected.');
@@ -76,8 +72,6 @@ export const tcpServer = net.createServer(s => {
     });
 
   });
-
-  //////////////
 
 });
 

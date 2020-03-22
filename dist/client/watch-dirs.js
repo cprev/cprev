@@ -11,7 +11,7 @@ const doWrite = (s, v) => {
         return;
     }
     bunion_1.default.info("fb224b51-bb55-45d3-aa46-8f3d2c6ce55d writing payload:", v);
-    s.write(JSON.stringify({ val: v }) + '\n', 'utf8');
+    s.write(JSON.stringify(v) + '\n', 'utf8');
 };
 let callable = true;
 exports.watchDirs = (dirs) => {
@@ -32,10 +32,13 @@ exports.watchDirs = (dirs) => {
                 if (i.git_repo) {
                     return agent_1.getConnection().then(v => {
                         doWrite(v, {
-                            repo: i.git_repo,
-                            file: fullPath,
-                            user_email: 'alex@oresoftware.com',
-                            user_name: 'alex'
+                            type: event === 'change' ? 'change' : 'read',
+                            val: {
+                                repo: i.git_repo,
+                                file: fullPath,
+                                user_email: 'alex@oresoftware.com',
+                                user_name: 'alex'
+                            }
                         });
                     });
                 }
@@ -76,10 +79,13 @@ exports.watchDirs = (dirs) => {
                     }
                     agent_1.getConnection().then(v => {
                         doWrite(v, {
-                            repo: i.git_repo,
-                            file: filename,
-                            user_email: 'alex@oresoftware.com',
-                            user_name: 'alex'
+                            type: event === 'change' ? 'change' : 'read',
+                            val: {
+                                repo: i.git_repo,
+                                file: fullPath,
+                                user_email: 'alex@oresoftware.com',
+                                user_name: 'alex'
+                            }
                         });
                     });
                 });
