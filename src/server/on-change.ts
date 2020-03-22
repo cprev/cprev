@@ -23,6 +23,8 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
   const now = Date.now();
 
   while (true) {
+    // we remove old changes from the beginning of queue
+    // mostly just to clean up memory
     const first = lst[0];
     if (first && now - first.time > 24 * 60 * 60) {
       lst.shift();
@@ -33,6 +35,7 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
 
 
   while(true){
+    // we remove all existing changes from current user from the end of queue
     const mostRecent = lst[lst.length - 1];
     if (mostRecent && mostRecent.user_email === userEmail) {
       lst.pop();
