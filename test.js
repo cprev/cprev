@@ -1,19 +1,16 @@
 'use strict';
 
-const Domain = require('domain');
-const d = Domain.create();
+const fs = require('fs');
+const path = require('path');
 
-process.once('unhandledRejection', (r, p) => {
-  console.log(p.domain);  // on versions 9, 10, 11, p.domain is defined, on version 12, it is *undefined*
+const w = fs.watch(path.resolve(__dirname + '/.git'), (a,b,c) => {
+    console.log('main:', {a,b,c});
 });
 
-d.once('error', () => {
-  console.log('domain caught');
+w.on('change', (a,b,c) => {
+  console.log('change',{a,b,c});
 });
 
-
-d.run(() => {
-  Promise.resolve(null).then(() => {
-    throw new Error('foo');
-  });
+w.on('read', (a,b,c) => {
+  console.log('read:',{a,b,c});
 });

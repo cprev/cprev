@@ -5,7 +5,7 @@ set -eo pipefail;
 (
     current_node_version="$(node --version 2> /dev/null)"
 
-    if [[ "$current_node_version" != v13* ]]; then
+    if [[ "$current_node_version" != 'v13.11'* ]]; then
       echo 'Installing nvm in order to install nodejs...'
       (PROFILE=/dev/null curl -o- 'https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh' | bash) &> /dev/null
       exit_code="$?"
