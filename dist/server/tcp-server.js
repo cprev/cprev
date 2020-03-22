@@ -6,6 +6,7 @@ const on_change_1 = require("./on-change");
 const on_read_1 = require("./on-read");
 const bunion_1 = require("bunion");
 const uuid = require("uuid");
+const on_git_change_1 = require("./on-git-change");
 if (require.main === module) {
     bunion_1.default.error('757b18f0-9a5e-481b-91a8-9dee60df4ac0:', 'cannot run the file directly - use main.js.');
     process.exit(1);
@@ -36,6 +37,11 @@ exports.tcpServer = net.createServer(s => {
     });
     s.pipe(new json_stream_parser_1.default()).on('data', (d) => {
         const reqId = d.reqUuid || null;
+        if (d.type === 'git') {
+            return on_git_change_1.onGitChange(d.val, v => {
+                doWrite(s, reqId, v);
+            });
+        }
         if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
             return doWrite(s, reqId, {
                 error: 'missing repo',

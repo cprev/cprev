@@ -2,11 +2,12 @@
 
 import * as net from 'net';
 import JSONParser from "@oresoftware/json-stream-parser";
-import {ChangePayload, ReadPayload, SocketMessage} from "../types";
+import {ChangePayload, GitPayload, ReadPayload, SocketMessage} from "../types";
 import {onChange} from "./on-change";
 import {onRead} from "./on-read";
 import log from 'bunion';
 import * as uuid from 'uuid';
+import {onGitChange} from "./on-git-change";
 
 if (require.main === module) {
   log.error('757b18f0-9a5e-481b-91a8-9dee60df4ac0:', 'cannot run the file directly - use main.js.');
@@ -17,7 +18,7 @@ export const connections = new Set<net.Socket>();
 
 ////
 
-const doWrite = (s: net.Socket, resUuid: string | null, v: {reqUuid: string, [key:string]: any}) => {
+const doWrite = (s: net.Socket, resUuid: string | null, v: { reqUuid: string, [key: string]: any }) => {
   if (!s.writable) {
     log.warn('bae5c25d-60c6-4dd5-91af-d993142199ae: socket is not writable.');
     return;
@@ -48,15 +49,21 @@ export const tcpServer = net.createServer(s => {
   });
 
   s.pipe(new JSONParser()).on('data', (d: SocketMessage) => {
-  // s.on('data', (d: SocketMessage) => {
+    // s.on('data', (d: SocketMessage) => {
 
     const reqId = d.reqUuid || null;
+
+    if(d.type === 'git'){
+      return onGitChange(d.val as GitPayload, v => {
+        doWrite(s, reqId, v);
+      });
+    }
 
     if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
       return doWrite(s, reqId, {
         error: 'missing repo',
         reqUuid: uuid.v4()
-        });
+      });
     }
 
     if (d.type === 'change') {
