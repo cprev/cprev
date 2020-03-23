@@ -3,6 +3,7 @@
 import {ChangePayload, CodeChange, ResultCallback} from "../types";
 import {repos} from "./cache";
 import {getGitRepoIdFromURL} from "./on-git-change";
+import log from "bunion";
 
 
 export function onRead(p: ChangePayload, userUuid: string, cb: ResultCallback) {
@@ -15,6 +16,10 @@ export function onRead(p: ChangePayload, userUuid: string, cb: ResultCallback) {
       error: `repoId does not exist yet for path: '${p.repo}'` //
     });
   }
+
+  log.info('the repo id:', repoId);
+  log.info('the user id:', userUuid);
+
 
   if (!repos[repoId]) {
     repos[repoId] = {
@@ -32,6 +37,8 @@ export function onRead(p: ChangePayload, userUuid: string, cb: ResultCallback) {
   }
 
   const lst = repo.files[p.file];
+
+  log.info('current event list:', lst);
 
   const now = Date.now();
 

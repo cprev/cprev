@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const cache_1 = require("./cache");
 const on_git_change_1 = require("./on-git-change");
+const bunion_1 = require("bunion");
 function onChange(p, userUuid, cb) {
     const repoId = on_git_change_1.getGitRepoIdFromURL(p.repo_remotes);
     if (!repoId) {
@@ -10,6 +11,8 @@ function onChange(p, userUuid, cb) {
             error: `repoId does not exist yet for path: '${p.repo}'`
         });
     }
+    bunion_1.default.info('the repo id:', repoId);
+    bunion_1.default.info('the user id:', userUuid);
     if (!cache_1.repos[repoId]) {
         cache_1.repos[repoId] = {
             repoId,
@@ -22,6 +25,7 @@ function onChange(p, userUuid, cb) {
         repo.files[p.file] = [];
     }
     const lst = repo.files[p.file];
+    bunion_1.default.info('current event list:', lst);
     const now = Date.now();
     while (true) {
         const first = lst[0];
