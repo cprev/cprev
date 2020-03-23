@@ -9,7 +9,7 @@ exports.repoIdToRepoPath = new Map();
 exports.repoIdToRemoteURL = new Map();
 exports.repoPathToRepoId = new Map();
 exports.remoteURLToRepoId = new Map();
-exports.getGitRepoFromPath = (pth) => {
+exports.getGitRepoIdFromPath = (pth) => {
     if (exports.repoPathToRepoId.has(pth)) {
         return exports.repoPathToRepoId.get(pth).id;
     }

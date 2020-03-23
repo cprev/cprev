@@ -1,9 +1,18 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
 const cache_1 = require("./cache");
+const on_git_change_1 = require("./on-git-change");
 function onRead(p, cb) {
-    if (!cache_1.repos[p.repo]) {
-        cache_1.repos[p.repo] = {
+    const repoId = on_git_change_1.getGitRepoIdFromPath(p.repo);
+    if (!repoId) {
+        return cb({
+            result: 'error',
+            error: 'repoId does not exist yet.'
+        });
+    }
+    if (!cache_1.repos[repoId]) {
+        cache_1.repos[repoId] = {
+            repoId,
             url: p.repo,
             files: {}
         };

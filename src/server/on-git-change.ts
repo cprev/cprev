@@ -11,7 +11,7 @@ export const repoIdToRemoteURL = new Map<string, { url: string }>();
 export const repoPathToRepoId = new Map<string, { id: string }>();
 export const remoteURLToRepoId = new Map<string, { id: string }>();
 
-export const getGitRepoFromPath = (pth: string): string | null => {
+export const getGitRepoIdFromPath = (pth: string): string | null => {
   if (repoPathToRepoId.has(pth)) {
     return (repoPathToRepoId.get(pth) as { id: string }).id;
   }

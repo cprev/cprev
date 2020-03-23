@@ -17,6 +17,7 @@ export interface CodeChange {
 
 export interface Repo {
   url: string,
+  repoId: string,
   files: {
     [key: string]: Array<CodeChange>
   }

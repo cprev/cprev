@@ -2,18 +2,29 @@
 
 import {CodeChange, ChangePayload, ResultCallback} from "../types";
 import {repos} from "./cache";
+import {getGitRepoIdFromPath} from "./on-git-change";
 
 export function onChange(p: ChangePayload, cb: ResultCallback) {
 
-  if (!repos[p.repo]) {
-    repos[p.repo] = {
-      url: p.repo,
+  const repoId = getGitRepoIdFromPath(p.repo);
+
+  if (!repoId) {
+    return cb({
+      result: 'error',
+      error: 'repoId does not exist yet.'
+    });
+  }
+
+  if (!repos[repoId]) {
+    repos[repoId] = {
+      repoId,
+      url: repoId,
       files: {}
     };
   }
 
   const userEmail = p.user_email;
-  const repo = repos[p.repo];
+  const repo = repos[repoId];
 
   if (!repo.files[p.file]) {
     repo.files[p.file] = [];
@@ -33,8 +44,7 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
     break;
   }
 
-
-  while(true){
+  while (true) {
     // we remove all existing changes from current user from the end of queue
     const mostRecent = lst[lst.length - 1];
     if (mostRecent && mostRecent.user_email === userEmail) {
@@ -57,14 +67,14 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
     });
   }
 
-  if(mostRecent.user_email === userEmail){
+  if (mostRecent.user_email === userEmail) {
     // current user made the most recent change, so no conflicts
     return cb({
       result: 'no conflicts'
     });
   }
 
-  const set = new Set();  //////
+  const set = new Set();
 
   const conflicts = lst.reduceRight((a, b) => {
 
@@ -73,7 +83,7 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
       return a;
     }
 
-    if(b.user_email === userEmail){
+    if (b.user_email === userEmail) {
       return a;
     }
 
@@ -85,13 +95,11 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
 
   }, [] as Array<CodeChange>);
 
-
   if (conflicts.length < 1) {
     return cb({
       result: 'no conflicts'
     });
   }
-
 
   return cb({
     result: 'conflict',

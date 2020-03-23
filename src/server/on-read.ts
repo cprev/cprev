@@ -2,11 +2,22 @@
 
 import {ChangePayload, CodeChange, ResultCallback} from "../types";
 import {repos} from "./cache";
+import {getGitRepoIdFromPath} from "./on-git-change";
 
 export function onRead(p: ChangePayload, cb: ResultCallback) {
 
-  if (!repos[p.repo]) {
-    repos[p.repo] = {
+  const repoId = getGitRepoIdFromPath(p.repo);
+
+  if(!repoId){
+    return cb({
+      result: 'error',
+      error: 'repoId does not exist yet.'
+    });
+  }
+
+  if (!repos[repoId]) {
+    repos[repoId] = {
+      repoId,
       url: p.repo,
       files: {}
     };
