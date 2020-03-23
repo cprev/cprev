@@ -2,27 +2,40 @@
 
 import {CodeChange, ChangePayload, ResultCallback} from "../types";
 import {repos} from "./cache";
+import {getGitRepoIdFromURL} from "./on-git-change";
 
-export function onChange(b: ChangePayload, cb: ResultCallback) {
+export function onChange(p: ChangePayload, cb: ResultCallback) {
 
-  if (!repos[b.repo]) {
-    repos[b.repo] = {
-      url: b.repo,
+  const repoId = getGitRepoIdFromURL(p.repo_remotes);
+
+  if (!repoId) {
+    return cb({
+      result: 'error',
+      error: `repoId does not exist yet for path: '${p.repo}'`
+    });
+  }
+
+  if (!repos[repoId]) {
+    repos[repoId] = {
+      repoId,
+      url: repoId,
       files: {}
     };
   }
 
-  const repo = repos[b.repo];
+  const userEmail = p.user_email;
+  const repo = repos[repoId];    ////
 
-  if (!repo.files[b.file]) {
-    repo.files[b.file] = [];
+  if (!repo.files[p.file]) {
+    repo.files[p.file] = [];
   }
 
-  const lst = repo.files[b.file];
-
+  const lst = repo.files[p.file];
   const now = Date.now();
 
   while (true) {
+    // we remove old changes from the beginning of queue
+    // mostly just to clean up memory
     const first = lst[0];
     if (first && now - first.time > 24 * 60 * 60) {
       lst.shift();
@@ -31,14 +44,31 @@ export function onChange(b: ChangePayload, cb: ResultCallback) {
     break;
   }
 
+  while (true) {
+    // we remove all existing changes from current user from the end of queue
+    const mostRecent = lst[lst.length - 1];
+    if (mostRecent && mostRecent.user_email === userEmail) {
+      lst.pop();
+      continue;
+    }
+    break;
+  }
+
   const mostRecent = lst[lst.length - 1];
 
   lst.push({
-    ...b,
+    ...p,
     time: now
   });
 
   if (!mostRecent) {
+    return cb({
+      result: 'no conflicts'
+    });
+  }
+
+  if (mostRecent.user_email === userEmail) {
+    // current user made the most recent change, so no conflicts
     return cb({
       result: 'no conflicts'
     });
@@ -49,6 +79,11 @@ export function onChange(b: ChangePayload, cb: ResultCallback) {
   const conflicts = lst.reduceRight((a, b) => {
 
     if (a.length > 3) {
+      // we only send back the 4 most recent changes
+      return a;
+    }
+
+    if (b.user_email === userEmail) {
       return a;
     }
 
@@ -59,6 +94,12 @@ export function onChange(b: ChangePayload, cb: ResultCallback) {
     return a;
 
   }, [] as Array<CodeChange>);
+
+  if (conflicts.length < 1) {
+    return cb({
+      result: 'no conflicts'
+    });
+  }
 
   return cb({
     result: 'conflict',

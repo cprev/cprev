@@ -2,29 +2,43 @@
 
 import {ChangePayload, CodeChange, ResultCallback} from "../types";
 import {repos} from "./cache";
+import {getGitRepoIdFromURL} from "./on-git-change";
 
-export function onRead(b: ChangePayload, cb: ResultCallback) {
 
-  if (!repos[b.repo]) {
-    repos[b.repo] = {
-      url: b.repo,
+export function onRead(p: ChangePayload, cb: ResultCallback) {
+
+  const repoId = getGitRepoIdFromURL(p.repo_remotes);
+
+  if(!repoId){
+    return cb({
+      result: 'error',
+      error: `repoId does not exist yet for path: '${p.repo}'` //
+    });
+  }
+
+  if (!repos[repoId]) {
+    repos[repoId] = {
+      repoId,
+      url: p.repo,
       files: {}
     };
   }
 
-  const repo = repos[b.repo];
+  const userEmail = p.user_email;
 
-  if (!repo.files[b.file]) {
-    repo.files[b.file] = [];
+  const repo = repos[repoId];
+
+  if (!repo.files[p.file]) {
+    repo.files[p.file] = [];
   }
 
-  const lst = repo.files[b.file];
+  const lst = repo.files[p.file];
 
   const now = Date.now();
 
   while (true) {
     const first = lst[0];
-    if (first && now - first.time > 24 * 60 * 60) {
+    if (first && now - first.time > 72 * 60 * 60) {
       lst.shift();
       continue;
     }
@@ -34,7 +48,7 @@ export function onRead(b: ChangePayload, cb: ResultCallback) {
   const mostRecent = lst[lst.length - 1];
 
   lst.push({
-    ...b,
+    ...p,
     time: now
   });
 
@@ -52,6 +66,10 @@ export function onRead(b: ChangePayload, cb: ResultCallback) {
       return a;
     }
 
+    if(b.user_email === userEmail){
+      return a;
+    }
+
     if (!set.has(b.user_email)) {
       a.push(b);
     }
@@ -59,6 +77,15 @@ export function onRead(b: ChangePayload, cb: ResultCallback) {
     return a;
 
   }, [] as Array<CodeChange>);
+
+
+  if (conflicts.length < 1) {
+    return cb({
+      result: 'no conflicts'
+    });
+  }
+
+  //////
 
   return cb({
     result: 'conflict',

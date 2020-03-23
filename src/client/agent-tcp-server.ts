@@ -3,7 +3,7 @@
 import * as net from "net";
 import log from "bunion";
 import JSONParser from "@oresoftware/json-stream-parser";
-import {SocketMessage} from "./agent";
+import {SocketMessage} from "../types";
 
 const doWrite = (s: net.Socket, v: any) => {
 
@@ -41,15 +41,17 @@ export const agentTcpServer = net.createServer(s => {
   s.pipe(new JSONParser()).on('data', (d: SocketMessage) => {
   // s.on('data', (d: SocketMessage) => {
 
-    if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
-      return doWrite(s, {error: 'missing repo'});
-    }
+    // if (!(d.val && d.val.repo_path && typeof d.val.repo_path === 'string')) {
+    //   return doWrite(s, {error: 'missing repo'});
+    // }
 
-    log.error('8fe8e800-1525-4870-930b-2eeec3c42fbd: no task matched type:', d.type);
+    log.info('message received on client:', d);
 
-    doWrite(s, {
-      error: `fc892414-4e91-456c-a6ef-55ef1bfcc92c: no task matched type: '${d.type}'`
-    });
+    // log.error('8fe8e800-1525-4870-930b-2eeec3c42fbd: no task matched type:', d.type);
+
+    // doWrite(s, {
+    //   error: `fc892414-4e91-456c-a6ef-55ef1bfcc92c: no task matched type: '${d.type}'`
+    // });
 
   });
 

@@ -6,28 +6,49 @@ import {ResultCallback, WatchDir} from "../types";
 import * as path from 'path';
 import log from "bunion";
 import * as fs from 'fs';
-import {ignoredPaths, ignorePathsRegex} from "../constants";
 import {dir} from "async";
+import * as cp from 'child_process';
 
 export const flattenDeep = (a: Array<any>): Array<any> => {
   return a.reduce((acc, val) => Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val), []);
 };
 
-export type EVCb<T, E = any> = (err?: E, val?: T) => void;
+export type EVCb<T, E = any> = (err: E, val: T) => void;
 
 type Task = (cb: EVCb<any>) => void;
 
-let callable = true;
 
-export const getWatchableDirs = (config: Config, cb: EVCb<Array<WatchDir>>) => {
+export const getGitRemote = (isGitRepo: boolean, cb: EVCb<Array<string>>) => {
 
-  if(!callable){
-    throw 'Why call me twice?'
+  const remotes: string[] = [];
+
+  if (!isGitRepo) {
+    return process.nextTick(cb, null, remotes);
   }
 
-  callable = false;
+  const k = cp.spawn('bash');
+  const cmd = `git remote | xargs git remote get-url --all`;
+  k.stdin.end(cmd);
+  k.stdout.on('data', d => {
+    remotes.push(String(d || '').trim());
+  });
+  k.once('exit', code => {
+    if (code && code > 0) {
+      log.warn(`Process (with cmd: '${cmd}') exited with code greater than 0:`, code);
+    }
+    cb(null, remotes);
+  });
+};
 
-  const paths = flattenDeep([config.codeRoots]).map(v => path.resolve(v));
+export const getWatchableDirs = (
+  searchDirs: Array<string> | Array<Array<string>>,
+  ignorePathsRegex: Array<RegExp>,
+  cb: EVCb<Array<WatchDir>>) => {
+
+
+  const paths = flattenDeep([searchDirs])
+    .filter(Boolean)
+    .map(v => path.resolve(v));
 
   const uniquePaths = Array.from(new Set(paths));
 
@@ -43,7 +64,6 @@ export const getWatchableDirs = (config: Config, cb: EVCb<Array<WatchDir>>) => {
     }
 
     alreadySeen.add(dir);
-
 
     for (let ignore of ignorePathsRegex) {
 
@@ -71,12 +91,12 @@ export const getWatchableDirs = (config: Config, cb: EVCb<Array<WatchDir>>) => {
 
         if (err) {
           // log.warn('7ae3f105-a04e-406f-846c-2a45f8515c1b:', err);
-          return cb(null);
+          return cb(null, null);
         }
 
         if (!stats.isDirectory()) {
           // log.debug('not a directory:', dir);
-          return cb(null);
+          return cb(null, null);
         }
 
         try {
@@ -92,27 +112,32 @@ export const getWatchableDirs = (config: Config, cb: EVCb<Array<WatchDir>>) => {
 
         fs.stat(potentialGitFolder, (err, stats) => {
 
+          let isGitRepo = false;
           if (stats && stats.isDirectory()) {
+            isGitRepo = true;
             relevantGitRepo = potentialGitFolder
           }
 
-          if (isWatchingNow) {
-            uniqueFolders.add({dirpath: dir, git_repo: relevantGitRepo});
-          }
+          getGitRemote(isGitRepo, (err, remotes) => {
 
-          fs.readdir(dir, (err, results) => {
-
-            cb(null);
-
-            if (err) {
-              log.warn('bb97184f-4a07-4acd-b7bc-59dc8e5fb0e4:', err);
-              return cb(null);
+            if (isWatchingNow) {
+              uniqueFolders.add({dirpath: dir, git_repo: relevantGitRepo, git_remotes: remotes});
             }
 
-            for (const v of results) {
-              goThroughDir(path.resolve(dir + '/' + v), isWatchingNow, relevantGitRepo);
-            }
+            fs.readdir(dir, (err, results) => {
 
+              cb(null, null);
+
+              if (err) {
+                log.warn('bb97184f-4a07-4acd-b7bc-59dc8e5fb0e4:', err);
+                return cb(null, null);
+              }
+
+              for (const v of results) {
+                goThroughDir(path.resolve(dir + '/' + v), isWatchingNow, relevantGitRepo);
+              }
+
+            });
           });
 
         });
