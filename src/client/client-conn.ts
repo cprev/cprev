@@ -51,9 +51,14 @@ const makeNewConnection = () => {
       return (cache.resolutions.get(d.resUuid) as any)(d);
     }
 
+    if(d.result === 'error'){
+      log.warn('error value in the received message:', d);
+      return;
+    }
+
     if (d.result === 'conflict') {
 
-      notifier.notify(
+      return notifier.notify(
         {
           title: 'There are conflicts!',
           message: 'There were conflicts!',

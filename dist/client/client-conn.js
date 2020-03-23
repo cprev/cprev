@@ -35,8 +35,12 @@ const makeNewConnection = () => {
         if (agent_1.cache.resolutions.has(d.resUuid)) {
             return agent_1.cache.resolutions.get(d.resUuid)(d);
         }
+        if (d.result === 'error') {
+            bunion_1.default.warn('error value in the received message:', d);
+            return;
+        }
         if (d.result === 'conflict') {
-            notifier.notify({
+            return notifier.notify({
                 title: 'There are conflicts!',
                 message: 'There were conflicts!',
             }, function (err, response) {
