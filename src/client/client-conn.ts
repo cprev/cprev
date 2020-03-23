@@ -51,7 +51,7 @@ const makeNewConnection = () => {
       return (cache.resolutions.get(d.resUuid) as any)(d);
     }
 
-    if (d.result === 'conflicts') {
+    if (d.result === 'conflict') {
 
       notifier.notify(
         {
@@ -67,7 +67,7 @@ const makeNewConnection = () => {
         }
       );
     }
-  });
+  });  //
 
   conn.once('connect', () => {
     log.info('agent connected to server via tcp:', c.httpServerHost, c.httpServerPort);

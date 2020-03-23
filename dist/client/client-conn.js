@@ -35,7 +35,7 @@ const makeNewConnection = () => {
         if (agent_1.cache.resolutions.has(d.resUuid)) {
             return agent_1.cache.resolutions.get(d.resUuid)(d);
         }
-        if (d.result === 'conflicts') {
+        if (d.result === 'conflict') {
             notifier.notify({
                 title: 'There are conflicts!',
                 message: 'There were conflicts!',
