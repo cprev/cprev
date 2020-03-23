@@ -8,13 +8,24 @@ export const remoteURLToRepoPath = new Map<string, { pth: string }>();
 export const repoPathToRemoteURL = new Map<string, { url: string }>();
 export const repoIdToRepoPath = new Map<string, { pth: string }>();
 export const repoIdToRemoteURL = new Map<string, { url: string }>();
-export const repoPathToRepoId = new Map<string, { id: string }>();
+// export const repoPathToRepoId = new Map<string, { id: string }>();
 export const remoteURLToRepoId = new Map<string, { id: string }>();
 
-export const getGitRepoIdFromPath = (pth: string): string | null => {
-  if (repoPathToRepoId.has(pth)) {
-    return (repoPathToRepoId.get(pth) as { id: string }).id;
+// export const getGitRepoIdFromPath = (pth: string): string | null => {
+//   if (repoPathToRepoId.has(pth)) {
+//     return (repoPathToRepoId.get(pth) as { id: string }).id;
+//   }
+//   return null;
+// };
+
+export const getGitRepoIdFromURL = (urls: Array<string>): string | null => {
+
+  for(const u of flattenDeep([urls]).filter(Boolean)){
+    if (remoteURLToRepoId.has(u)) {
+      return (remoteURLToRepoId.get(u) as { id: string }).id;
+    }
   }
+
   return null;
 };
 
@@ -36,7 +47,7 @@ export const onGitChange = (p: GitPayload, cb: ResultCallback) => {
     repoId = uuid.v4();
   }
 
-  repoPathToRepoId.set(p.repo_path, {id: repoId});
+  // repoPathToRepoId.set(p.repo_path, {id: repoId});
   repoIdToRepoPath.set(repoId, {pth: p.repo_path});
 
   for (const u of urls) {
@@ -46,7 +57,19 @@ export const onGitChange = (p: GitPayload, cb: ResultCallback) => {
      repoPathToRemoteURL.set(p.repo_path, {url: u});
   }
 
+  [
+    {repoPathToRemoteURL},
+    // {repoPathToRepoId},
+    {remoteURLToRepoPath},
+    {remoteURLToRepoId},
+    {repoIdToRemoteURL},
+    {repoIdToRepoPath},
+  ]
+    .forEach(v => {
+      console.log(v); //
+    });
 
-  cb(null);
+
+  cb(p);
 
 };

@@ -9,8 +9,10 @@ exports.httpServerPort = 3045;
 exports.tcpServerPort = 3046;
 exports.ignoredPaths = [
     '/node_modules/',
+    '/.git/',
     '/.idea/',
+    '/.cprev/lib/',
     '/.vscode/',
-    `${process.env.GOPATH}/pkg`,
+    `${process.env.GOPATH}/pkg/`,
 ];
 exports.ignorePathsRegex = exports.ignoredPaths.map(v => new RegExp(v, 'i'));

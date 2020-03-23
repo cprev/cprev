@@ -12,17 +12,26 @@ if (require.main === module) {
     process.exit(1);
 }
 exports.connections = new Set();
-const doWrite = (s, resUuid, v) => {
+const doWrite = (s, originalReqId, v) => {
     if (!s.writable) {
         bunion_1.default.warn('bae5c25d-60c6-4dd5-91af-d993142199ae: socket is not writable.');
         return;
     }
+    if (!(v && typeof v === 'object')) {
+        bunion_1.default.warn('payload is not an object:', v);
+        return;
+    }
+    if (v.resUuid) {
+        bunion_1.default.warn('refusing to write to socket since payload has resUuid property:', v);
+        return;
+    }
     bunion_1.default.info("5897e002-6690-42b3-8fa3-fa5ec7929541 writing payload:", v);
-    v.resUuid = resUuid || null;
+    v.resUuid = originalReqId || null;
     s.write(JSON.stringify(v) + '\n', 'utf8');
 };
 exports.tcpServer = net.createServer(s => {
     exports.connections.add(s);
+    bunion_1.default.info('db8e1576-91d2-43f6-9285-6ff35d0f864a: new connection.');
     s.once('error', e => {
         bunion_1.default.error('6f955362-4aec-4841-ba57-c98cd30cd2b5:', 'socket conn error: ', e);
         exports.connections.delete(s);

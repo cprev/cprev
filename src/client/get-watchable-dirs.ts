@@ -6,7 +6,6 @@ import {ResultCallback, WatchDir} from "../types";
 import * as path from 'path';
 import log from "bunion";
 import * as fs from 'fs';
-import {ignoredPaths, ignorePathsRegex} from "../constants";
 import {dir} from "async";
 import * as cp from 'child_process';
 
@@ -18,7 +17,6 @@ export type EVCb<T, E = any> = (err: E, val: T) => void;
 
 type Task = (cb: EVCb<any>) => void;
 
-let callable = true;
 
 export const getGitRemote = (isGitRepo: boolean, cb: EVCb<Array<string>>) => {
 
@@ -42,15 +40,13 @@ export const getGitRemote = (isGitRepo: boolean, cb: EVCb<Array<string>>) => {
   });
 };
 
-export const getWatchableDirs = (config: Config, cb: EVCb<Array<WatchDir>>) => {
+export const getWatchableDirs = (
+  searchDirs: Array<string> | Array<Array<string>>,
+  ignorePathsRegex: Array<RegExp>,
+  cb: EVCb<Array<WatchDir>>) => {
 
-  if (!callable) {
-    throw 'Why call me twice?'
-  }
 
-  callable = false;
-
-  const paths = flattenDeep([config.codeRoots])
+  const paths = flattenDeep([searchDirs])
     .filter(Boolean)
     .map(v => path.resolve(v));
 

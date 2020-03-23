@@ -32,6 +32,7 @@ export interface SocketMessage {
 
 export interface ChangePayload {
   repo: string,
+  repo_remotes: Array<string>,
   file: string,
   user_name: string,
   user_email: string
@@ -52,6 +53,7 @@ export interface GitPayload {
 export interface ReadPayload {
   repo: string,
   file: string,
+  repo_remotes: Array<string>,
   user_name: string,
   user_email: string
 }

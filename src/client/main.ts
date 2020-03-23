@@ -3,17 +3,21 @@
 
 import log from "bunion";
 import * as fs from "fs";
-import {localAgentSocketPath} from "../constants";
+import {ignorePathsRegex, localAgentSocketPath} from "../constants";
 import * as path from "path";
 import {agentTcpServer} from './agent-tcp-server'
 import {getWatchableDirs} from "./get-watchable-dirs";
 
 import config from '../.cprev.conf.js';
 import {watchDirs} from "./watch-dirs";
+import {mkdirSafe} from "../utils";
+import Timer = NodeJS.Timer;
 
 export type Config = typeof config
 
-getWatchableDirs(config, (err, dirs) => {
+const rootDirs = config.codeRoots;
+
+getWatchableDirs(rootDirs, ignorePathsRegex, (err, dirs) => {
 
   if (err) {
     log.error('4585a17b-a478-4ba0-beca-c0702d0983ea:', err);
@@ -28,6 +32,42 @@ getWatchableDirs(config, (err, dirs) => {
 
   watchDirs(dirs);
 });
+
+
+const mydirs = [
+  path.resolve(process.env.HOME + '/.cprev'),
+  path.resolve(process.env.HOME + '/.cprev/conf')
+];
+
+for(const d of mydirs){
+  mkdirSafe(d);
+}
+
+getWatchableDirs(mydirs, [new RegExp('/.cprev/lib/')], (err, dirs) => {
+
+  if(err){
+    log.error(err);
+    log.fatal('Could not watch the following dirs:', dirs);
+  }
+
+  let to  = <Timer><unknown>null;
+  for (const i of dirs) {
+
+    fs.watch(i.dirpath, (event: string, filename: string) => {
+
+      clearTimeout(to);
+
+      to = setTimeout(() => {
+        log.info('Config file changed, restarting.');
+        process.exit(0);
+      }, 800);
+
+    });
+
+  }
+});
+
+
 
 try {
   fs.unlinkSync(localAgentSocketPath)

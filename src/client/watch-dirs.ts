@@ -5,12 +5,14 @@ import * as fs from 'fs';
 import log from "bunion";
 import * as net from "net";
 import {getConnection} from "./client-conn";
-import {ChangePayload, SocketMessage, WatchDir} from "../types";
+import {ChangePayload, GitPayload, ReadPayload, SocketMessage, WatchDir} from "../types";
 import * as cp from 'child_process';
 import * as path from "path";
 import {dir} from "async";
 import * as uuid from 'uuid';
 import {cache} from "./agent";
+import {FSWatcher} from "fs";
+import {getGitRemotes, getGitRepoPath} from "../utils";
 
 const doWrite = (s: net.Socket, v: SocketMessage) => {
 
@@ -18,28 +20,46 @@ const doWrite = (s: net.Socket, v: SocketMessage) => {
     log.warn('44558c07-2b13-4f9c-9f3c-7e524e11fe07: socket is not writable.');
     return;
   }
+
+  if(!(v && typeof v === 'object')){
+    log.warn('payload is not an object:', v);
+    return;
+  }
+
+  if(v.resUuid){
+    log.warn('refusing to write to socket since payload has resUuid property:', v);
+    return;
+  }
+
   log.info("fb224b51-bb55-45d3-aa46-8f3d2c6ce55d writing payload:", v);
   s.write(JSON.stringify(v) + '\n', 'utf8');
 };
-
-let callable = true;
-
+//
 const hasGitGrandparent = (pth: string): boolean => {
   const dirname = path.dirname(pth);
-  if(dirname.endsWith('/.git')){
+  if (dirname.endsWith('/.git')) {
     return true;
   }
-  if(dirname === pth){
+  if (dirname === pth) {
     return false;
   }
   return hasGitGrandparent(dirname);
 };
 
-const updateForGit = (fullPath: string) => {
+const updateForGit = (p: GitPayload) => {
+
+  const id = uuid.v4();
+
+  getConnection().then(s => {
+    doWrite(s, {
+      type: 'git',
+      reqUuid: id,
+      val: p
+    });
+  });
 
   return new Promise((resolve) => {
 
-    const id = uuid.v4();
     let timedout = false;
     const to = setTimeout(() => {
       timedout = true;
@@ -49,7 +69,7 @@ const updateForGit = (fullPath: string) => {
 
     cache.resolutions.set(id, () => {
       cache.resolutions.delete(id);
-      if(timedout){
+      if (timedout) {
         return;
       }
       clearTimeout(to);
@@ -60,33 +80,32 @@ const updateForGit = (fullPath: string) => {
   });
 };
 
+export const watchedDirs = new Set<string>();
+export const dirToWatcher = new Map<string, FSWatcher>();
 
 export const watchDirs = (dirs: Array<WatchDir>) => {
-
-  if (!callable) {
-    return;
-  }
-
-  callable = false;
 
   const timers = new Map();
 
   console.log('dirs.length:', dirs.length);
-  for(let v of dirs){
+  for (let v of dirs) {
     log.info(v);
   }
 
   for (const i of dirs) {
 
-    let p : Promise<any> = Promise.resolve();
+    let p: Promise<any> = Promise.resolve();
 
-    fs.watch(i.dirpath, (event: string, filename: string) => {
+    const w = fs.watch(i.dirpath);
+
+    w.on('change', (event: string, filename: string) => {
 
       const fullPath = path.resolve(i.dirpath + '/' + filename);
 
-      if(hasGitGrandparent(fullPath)){
-         p = p.then(() => updateForGit(fullPath));
-         return;
+      if (hasGitGrandparent(fullPath)) {
+        // p = p.then(() => updateForGit(fullPath));
+        log.warn('This file/dir is within a ".git" dir?:', fullPath);
+        return;
       }
 
       log.info('filesystem event:', event, fullPath);
@@ -96,8 +115,63 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
         clearTimeout(timers.get(fullPath));
       }
 
+      const now = Date.now();
+
       timers.set(fullPath, setTimeout(() => {
 
+        return p = p.then(() => {
+
+          return getGitRepoPath(i.dirpath)
+            .then(v => {
+
+              console.log('result::', v); //
+
+              if (String(v || '').trim() === '') {
+                return null;
+              }
+
+              return getGitRemotes(i.dirpath).then(remotes => {
+                return {
+                  git_repo: v,
+                  remotes
+                }
+              })
+            })
+            .then(v => {
+
+              if (v === null) {
+                log.warn('the following file does not appear to be within a git repo:', fullPath);
+                return;
+              }
+
+              log.info('updating for git:', v); //
+
+              return updateForGit({
+                repo_path: v.git_repo,
+                remote_urls: v.remotes,
+                branch: null as any,
+                trackedFiles: null as any
+              })
+                .then(() => {
+                  return getConnection().then(s => {
+                    doWrite(s, {
+                      type: event === 'change' ? 'change' : 'read',
+                      reqUuid: uuid.v4(),
+                      val: {
+                        repo: i.git_repo,
+                        repo_remotes: v.remotes,
+                        file: fullPath,
+                        user_email: 'alex@oresoftware.com',
+                        user_name: 'alex'
+                      }
+                    });
+                  });
+                });
+
+            });
+        });
+
+        /// old colde
         if (i.git_repo) {
           return getConnection().then(v => {
             doWrite(v, {
@@ -105,6 +179,7 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
               reqUuid: uuid.v4(),
               val: {
                 repo: i.git_repo,
+                repo_remotes: [], // TODO fill this in
                 file: fullPath,
                 user_email: 'alex@oresoftware.com',
                 user_name: 'alex'
@@ -166,6 +241,7 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
               val: {
                 repo: i.git_repo,
                 file: fullPath,
+                repo_remotes: [], // TODO fill this in
                 user_email: 'alex@oresoftware.com',
                 user_name: 'alex'
               }
@@ -175,8 +251,20 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
 
         });
 
-      }, 2500));
+      }, 2500)); //
     });
+
+    w.once('close', () => {
+      watchedDirs.delete(i.dirpath);
+      w.removeAllListeners();
+    });
+
+    w.once('error', err => {
+      log.warn('dir watching error:', err, 'at path:', i.dirpath);
+      w.close();
+    });
+
+    dirToWatcher.set(i.dirpath, w);
   }
 
 };

@@ -7,11 +7,12 @@ exports.remoteURLToRepoPath = new Map();
 exports.repoPathToRemoteURL = new Map();
 exports.repoIdToRepoPath = new Map();
 exports.repoIdToRemoteURL = new Map();
-exports.repoPathToRepoId = new Map();
 exports.remoteURLToRepoId = new Map();
-exports.getGitRepoIdFromPath = (pth) => {
-    if (exports.repoPathToRepoId.has(pth)) {
-        return exports.repoPathToRepoId.get(pth).id;
+exports.getGitRepoIdFromURL = (urls) => {
+    for (const u of get_watchable_dirs_1.flattenDeep([urls]).filter(Boolean)) {
+        if (exports.remoteURLToRepoId.has(u)) {
+            return exports.remoteURLToRepoId.get(u).id;
+        }
     }
     return null;
 };
@@ -29,7 +30,6 @@ exports.onGitChange = (p, cb) => {
     if (!repoId) {
         repoId = uuid.v4();
     }
-    exports.repoPathToRepoId.set(p.repo_path, { id: repoId });
     exports.repoIdToRepoPath.set(repoId, { pth: p.repo_path });
     for (const u of urls) {
         exports.remoteURLToRepoId.set(u, { id: repoId });
@@ -37,5 +37,15 @@ exports.onGitChange = (p, cb) => {
         exports.remoteURLToRepoPath.set(u, { pth: p.repo_path });
         exports.repoPathToRemoteURL.set(p.repo_path, { url: u });
     }
-    cb(null);
+    [
+        { repoPathToRemoteURL: exports.repoPathToRemoteURL },
+        { remoteURLToRepoPath: exports.remoteURLToRepoPath },
+        { remoteURLToRepoId: exports.remoteURLToRepoId },
+        { repoIdToRemoteURL: exports.repoIdToRemoteURL },
+        { repoIdToRepoPath: exports.repoIdToRepoPath },
+    ]
+        .forEach(v => {
+        console.log(v);
+    });
+    cb(p);
 };

@@ -9,7 +9,9 @@ const agent_tcp_server_1 = require("./agent-tcp-server");
 const get_watchable_dirs_1 = require("./get-watchable-dirs");
 const _cprev_conf_js_1 = require("../.cprev.conf.js");
 const watch_dirs_1 = require("./watch-dirs");
-get_watchable_dirs_1.getWatchableDirs(_cprev_conf_js_1.default, (err, dirs) => {
+const utils_1 = require("../utils");
+const rootDirs = _cprev_conf_js_1.default.codeRoots;
+get_watchable_dirs_1.getWatchableDirs(rootDirs, constants_1.ignorePathsRegex, (err, dirs) => {
     if (err) {
         bunion_1.default.error('4585a17b-a478-4ba0-beca-c0702d0983ea:', err);
         process.exit(1);
@@ -19,6 +21,29 @@ get_watchable_dirs_1.getWatchableDirs(_cprev_conf_js_1.default, (err, dirs) => {
         process.exit(1);
     }
     watch_dirs_1.watchDirs(dirs);
+});
+const mydirs = [
+    path.resolve(process.env.HOME + '/.cprev'),
+    path.resolve(process.env.HOME + '/.cprev/conf')
+];
+for (const d of mydirs) {
+    utils_1.mkdirSafe(d);
+}
+get_watchable_dirs_1.getWatchableDirs(mydirs, [new RegExp('/.cprev/lib/')], (err, dirs) => {
+    if (err) {
+        bunion_1.default.error(err);
+        bunion_1.default.fatal('Could not watch the following dirs:', dirs);
+    }
+    let to = null;
+    for (const i of dirs) {
+        fs.watch(i.dirpath, (event, filename) => {
+            clearTimeout(to);
+            to = setTimeout(() => {
+                bunion_1.default.info('Config file changed, restarting.');
+                process.exit(0);
+            }, 800);
+        });
+    }
 });
 try {
     fs.unlinkSync(constants_1.localAgentSocketPath);

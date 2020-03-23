@@ -12,10 +12,11 @@ export const tcpServerPort = 3046;
 
 export const ignoredPaths = [
   '/node_modules/',
-  // '/.git/',
+  '/.git/',  // TODO: optimize later to watch git dirs
   '/.idea/',
+  '/.cprev/lib/',
   '/.vscode/',
-  `${process.env.GOPATH}/pkg`,
+  `${process.env.GOPATH}/pkg/`,
 ];
 
 export const ignorePathsRegex = ignoredPaths.map(v => new RegExp(v, 'i'));

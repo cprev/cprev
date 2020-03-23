@@ -4,12 +4,10 @@ const async = require("async");
 const path = require("path");
 const bunion_1 = require("bunion");
 const fs = require("fs");
-const constants_1 = require("../constants");
 const cp = require("child_process");
 exports.flattenDeep = (a) => {
     return a.reduce((acc, val) => Array.isArray(val) ? acc.concat(exports.flattenDeep(val)) : acc.concat(val), []);
 };
-let callable = true;
 exports.getGitRemote = (isGitRepo, cb) => {
     const remotes = [];
     if (!isGitRepo) {
@@ -28,12 +26,8 @@ exports.getGitRemote = (isGitRepo, cb) => {
         cb(null, remotes);
     });
 };
-exports.getWatchableDirs = (config, cb) => {
-    if (!callable) {
-        throw 'Why call me twice?';
-    }
-    callable = false;
-    const paths = exports.flattenDeep([config.codeRoots])
+exports.getWatchableDirs = (searchDirs, ignorePathsRegex, cb) => {
+    const paths = exports.flattenDeep([searchDirs])
         .filter(Boolean)
         .map(v => path.resolve(v));
     const uniquePaths = Array.from(new Set(paths));
@@ -45,7 +39,7 @@ exports.getWatchableDirs = (config, cb) => {
             return;
         }
         alreadySeen.add(dir);
-        for (let ignore of constants_1.ignorePathsRegex) {
+        for (let ignore of ignorePathsRegex) {
             if (ignore.test(path.resolve(dir))) {
                 bunion_1.default.debug('path ignored:', dir);
                 return;

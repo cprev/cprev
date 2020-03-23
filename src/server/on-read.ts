@@ -2,16 +2,17 @@
 
 import {ChangePayload, CodeChange, ResultCallback} from "../types";
 import {repos} from "./cache";
-import {getGitRepoIdFromPath} from "./on-git-change";
+import {getGitRepoIdFromURL} from "./on-git-change";
+
 
 export function onRead(p: ChangePayload, cb: ResultCallback) {
 
-  const repoId = getGitRepoIdFromPath(p.repo);
+  const repoId = getGitRepoIdFromURL(p.repo_remotes);
 
   if(!repoId){
     return cb({
       result: 'error',
-      error: 'repoId does not exist yet.'
+      error: `repoId does not exist yet for path: '${p.repo}'` //
     });
   }
 
@@ -25,7 +26,7 @@ export function onRead(p: ChangePayload, cb: ResultCallback) {
 
   const userEmail = p.user_email;
 
-  const repo = repos[p.repo];
+  const repo = repos[repoId];
 
   if (!repo.files[p.file]) {
     repo.files[p.file] = [];

@@ -7,15 +7,23 @@ const cp = require("child_process");
 const path = require("path");
 const uuid = require("uuid");
 const agent_1 = require("./agent");
+const utils_1 = require("../utils");
 const doWrite = (s, v) => {
     if (!s.writable) {
         bunion_1.default.warn('44558c07-2b13-4f9c-9f3c-7e524e11fe07: socket is not writable.');
         return;
     }
+    if (!(v && typeof v === 'object')) {
+        bunion_1.default.warn('payload is not an object:', v);
+        return;
+    }
+    if (v.resUuid) {
+        bunion_1.default.warn('refusing to write to socket since payload has resUuid property:', v);
+        return;
+    }
     bunion_1.default.info("fb224b51-bb55-45d3-aa46-8f3d2c6ce55d writing payload:", v);
     s.write(JSON.stringify(v) + '\n', 'utf8');
 };
-let callable = true;
 const hasGitGrandparent = (pth) => {
     const dirname = path.dirname(pth);
     if (dirname.endsWith('/.git')) {
@@ -26,9 +34,16 @@ const hasGitGrandparent = (pth) => {
     }
     return hasGitGrandparent(dirname);
 };
-const updateForGit = (fullPath) => {
+const updateForGit = (p) => {
+    const id = uuid.v4();
+    client_conn_1.getConnection().then(s => {
+        doWrite(s, {
+            type: 'git',
+            reqUuid: id,
+            val: p
+        });
+    });
     return new Promise((resolve) => {
-        const id = uuid.v4();
         let timedout = false;
         const to = setTimeout(() => {
             timedout = true;
@@ -45,11 +60,9 @@ const updateForGit = (fullPath) => {
         });
     });
 };
+exports.watchedDirs = new Set();
+exports.dirToWatcher = new Map();
 exports.watchDirs = (dirs) => {
-    if (!callable) {
-        return;
-    }
-    callable = false;
     const timers = new Map();
     console.log('dirs.length:', dirs.length);
     for (let v of dirs) {
@@ -57,17 +70,62 @@ exports.watchDirs = (dirs) => {
     }
     for (const i of dirs) {
         let p = Promise.resolve();
-        fs.watch(i.dirpath, (event, filename) => {
+        const w = fs.watch(i.dirpath);
+        w.on('change', (event, filename) => {
             const fullPath = path.resolve(i.dirpath + '/' + filename);
             if (hasGitGrandparent(fullPath)) {
-                p = p.then(() => updateForGit(fullPath));
+                bunion_1.default.warn('This file/dir is within a ".git" dir?:', fullPath);
                 return;
             }
             bunion_1.default.info('filesystem event:', event, fullPath);
             if (timers.has(fullPath)) {
                 clearTimeout(timers.get(fullPath));
             }
+            const now = Date.now();
             timers.set(fullPath, setTimeout(() => {
+                return p = p.then(() => {
+                    return utils_1.getGitRepoPath(i.dirpath)
+                        .then(v => {
+                        console.log('result::', v);
+                        if (String(v || '').trim() === '') {
+                            return null;
+                        }
+                        return utils_1.getGitRemotes(i.dirpath).then(remotes => {
+                            return {
+                                git_repo: v,
+                                remotes
+                            };
+                        });
+                    })
+                        .then(v => {
+                        if (v === null) {
+                            bunion_1.default.warn('the following file does not appear to be within a git repo:', fullPath);
+                            return;
+                        }
+                        bunion_1.default.info('updating for git:', v);
+                        return updateForGit({
+                            repo_path: v.git_repo,
+                            remote_urls: v.remotes,
+                            branch: null,
+                            trackedFiles: null
+                        })
+                            .then(() => {
+                            return client_conn_1.getConnection().then(s => {
+                                doWrite(s, {
+                                    type: event === 'change' ? 'change' : 'read',
+                                    reqUuid: uuid.v4(),
+                                    val: {
+                                        repo: i.git_repo,
+                                        repo_remotes: v.remotes,
+                                        file: fullPath,
+                                        user_email: 'alex@oresoftware.com',
+                                        user_name: 'alex'
+                                    }
+                                });
+                            });
+                        });
+                    });
+                });
                 if (i.git_repo) {
                     return client_conn_1.getConnection().then(v => {
                         doWrite(v, {
@@ -75,6 +133,7 @@ exports.watchDirs = (dirs) => {
                             reqUuid: uuid.v4(),
                             val: {
                                 repo: i.git_repo,
+                                repo_remotes: [],
                                 file: fullPath,
                                 user_email: 'alex@oresoftware.com',
                                 user_name: 'alex'
@@ -124,6 +183,7 @@ exports.watchDirs = (dirs) => {
                             val: {
                                 repo: i.git_repo,
                                 file: fullPath,
+                                repo_remotes: [],
                                 user_email: 'alex@oresoftware.com',
                                 user_name: 'alex'
                             }
@@ -132,5 +192,14 @@ exports.watchDirs = (dirs) => {
                 });
             }, 2500));
         });
+        w.once('close', () => {
+            exports.watchedDirs.delete(i.dirpath);
+            w.removeAllListeners();
+        });
+        w.once('error', err => {
+            bunion_1.default.warn('dir watching error:', err, 'at path:', i.dirpath);
+            w.close();
+        });
+        exports.dirToWatcher.set(i.dirpath, w);
     }
 };

@@ -16,21 +16,29 @@ if (require.main === module) {
 
 export const connections = new Set<net.Socket>();
 
-////
-
-const doWrite = (s: net.Socket, resUuid: string | null, v: { reqUuid: string, [key: string]: any }) => {
+const doWrite = (s: net.Socket, originalReqId: string | null, v: { reqUuid: string, [key: string]: any }) => {
   if (!s.writable) {
     log.warn('bae5c25d-60c6-4dd5-91af-d993142199ae: socket is not writable.');
     return;
   }
+  if(!(v && typeof v === 'object')){
+    log.warn('payload is not an object:', v);
+    return;
+  }
+  if(v.resUuid){
+    log.warn('refusing to write to socket since payload has resUuid property:', v);
+    return;
+  }
   log.info("5897e002-6690-42b3-8fa3-fa5ec7929541 writing payload:", v);
-  v.resUuid = resUuid || null;
+  v.resUuid = originalReqId || null;
   s.write(JSON.stringify(v) + '\n', 'utf8');
 };
 
 export const tcpServer = net.createServer(s => {
 
   connections.add(s);
+
+  log.info('db8e1576-91d2-43f6-9285-6ff35d0f864a: new connection.');
 
   s.once('error', e => {
     log.error('6f955362-4aec-4841-ba57-c98cd30cd2b5:', 'socket conn error: ', e);
@@ -48,6 +56,8 @@ export const tcpServer = net.createServer(s => {
     connections.delete(s);
   });
 
+
+  ////
   s.pipe(new JSONParser()).on('data', (d: SocketMessage) => {
     // s.on('data', (d: SocketMessage) => {
 
