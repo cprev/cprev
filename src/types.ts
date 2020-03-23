@@ -58,5 +58,6 @@ export interface ReadPayload {
 
 export interface WatchDir {
   dirpath: string,
-  git_repo: string
+  git_repo: string,
+  git_remotes: Array<string>
 }

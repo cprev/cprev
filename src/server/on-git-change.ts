@@ -26,7 +26,7 @@ export const onGitChange = (p: GitPayload, cb: ResultCallback) => {
   for (const u of urls) {
     if (remoteURLToRepoId.has(u)) {
       if (repoId) {
-        log.warn('More than repo id:', repoId);
+        log.warn('More than one repo id:', repoId);
       }
       repoId = (remoteURLToRepoId.get(u) as {id: string}).id;
     }

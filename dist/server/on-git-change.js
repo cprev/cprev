@@ -21,7 +21,7 @@ exports.onGitChange = (p, cb) => {
     for (const u of urls) {
         if (exports.remoteURLToRepoId.has(u)) {
             if (repoId) {
-                bunion_1.default.warn('More than repo id:', repoId);
+                bunion_1.default.warn('More than one repo id:', repoId);
             }
             repoId = exports.remoteURLToRepoId.get(u).id;
         }
