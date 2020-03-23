@@ -41,9 +41,9 @@ export const agentTcpServer = net.createServer(s => {
   s.pipe(new JSONParser()).on('data', (d: SocketMessage) => {
   // s.on('data', (d: SocketMessage) => {
 
-    if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
-      return doWrite(s, {error: 'missing repo'});
-    }
+    // if (!(d.val && d.val.repo_path && typeof d.val.repo_path === 'string')) {
+    //   return doWrite(s, {error: 'missing repo'});
+    // }
 
     log.info('message received on client:', d);
 

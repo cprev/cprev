@@ -42,12 +42,6 @@ exports.tcpServer = net.createServer(s => {
                 doWrite(s, reqId, v);
             });
         }
-        if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
-            return doWrite(s, reqId, {
-                error: 'missing repo',
-                reqUuid: uuid.v4()
-            });
-        }
         if (d.type === 'change') {
             return on_change_1.onChange(d.val, v => {
                 doWrite(s, reqId, v);

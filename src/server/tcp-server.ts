@@ -59,12 +59,12 @@ export const tcpServer = net.createServer(s => {
       });
     }
 
-    if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
-      return doWrite(s, reqId, {
-        error: 'missing repo',
-        reqUuid: uuid.v4()
-      });
-    }
+    // if (!(d.val && d.val.repo_path && typeof d.val.repo_path === 'string')) {
+    //   return doWrite(s, reqId, {
+    //     error: 'missing repo',
+    //     reqUuid: uuid.v4()
+    //   });
+    // }
 
     if (d.type === 'change') {
       return onChange(d.val as ChangePayload, v => {

@@ -28,9 +28,6 @@ exports.agentTcpServer = net.createServer(s => {
         exports.connections.delete(s);
     });
     s.pipe(new json_stream_parser_1.default()).on('data', (d) => {
-        if (!(d.val && d.val.repo && typeof d.val.repo === 'string')) {
-            return doWrite(s, { error: 'missing repo' });
-        }
         bunion_1.default.info('message received on client:', d);
     });
 });

@@ -37,7 +37,11 @@ export interface ChangePayload {
 }
 
 export interface GitPayload {
-  repo: string,
+  repo_path: string,
+  remote_urls: Array<string>,
+  // remote_urls: {
+  //   [key: string]: boolean
+  // },
   branch: string,
   trackedFiles: {
     [key:string]: true
