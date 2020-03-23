@@ -5,7 +5,7 @@ import {repos} from "./cache";
 import {getGitRepoIdFromURL} from "./on-git-change";
 
 
-export function onRead(p: ChangePayload, cb: ResultCallback) {
+export function onRead(p: ChangePayload, userUuid: string, cb: ResultCallback) {
 
   const repoId = getGitRepoIdFromURL(p.repo_remotes);
 
@@ -24,7 +24,6 @@ export function onRead(p: ChangePayload, cb: ResultCallback) {
     };
   }
 
-  const userEmail = p.user_email;
 
   const repo = repos[repoId];
 
@@ -49,6 +48,7 @@ export function onRead(p: ChangePayload, cb: ResultCallback) {
 
   lst.push({
     ...p,
+    user_uuid: userUuid,
     time: now
   });
 
@@ -66,11 +66,11 @@ export function onRead(p: ChangePayload, cb: ResultCallback) {
       return a;
     }
 
-    if(b.user_email === userEmail){
+    if(b.user_uuid === userUuid){
       return a;
     }
 
-    if (!set.has(b.user_email)) {
+    if (!set.has(b.user_uuid)) {
       a.push(b);
     }
 

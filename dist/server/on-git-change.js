@@ -16,7 +16,7 @@ exports.getGitRepoIdFromURL = (urls) => {
     }
     return null;
 };
-exports.onGitChange = (p, cb) => {
+exports.onGitChange = (p, userUuid, cb) => {
     const urls = new Set(get_watchable_dirs_1.flattenDeep([p.remote_urls]).filter(Boolean));
     let repoId = '';
     for (const u of urls) {

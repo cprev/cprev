@@ -13,23 +13,30 @@ import * as uuid from 'uuid';
 import {cache} from "./agent";
 import {FSWatcher} from "fs";
 import {getGitRemotes, getGitRepoPath} from "../utils";
+import config from '../.cprev.conf.js';
 
-const doWrite = (s: net.Socket, v: SocketMessage) => {
+const doWrite = (s: net.Socket, v: Partial<SocketMessage>) => {
 
   if (!s.writable) {
     log.warn('44558c07-2b13-4f9c-9f3c-7e524e11fe07: socket is not writable.');
     return;
   }
 
-  if(!(v && typeof v === 'object')){
+  if (!(v && typeof v === 'object')) {
     log.warn('payload is not an object:', v);
     return;
   }
 
-  if(v.resUuid){
+  if (v.resUuid) {
     log.warn('refusing to write to socket since payload has resUuid property:', v);
     return;
   }
+
+  if (!v.reqUuid) {
+    v.reqUuid = uuid.v4();
+  }
+
+  v.userUuid = config.userUuid;
 
   log.info("fb224b51-bb55-45d3-aa46-8f3d2c6ce55d writing payload:", v);
   s.write(JSON.stringify(v) + '\n', 'utf8');
@@ -149,6 +156,7 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
               return updateForGit({
                 repo_path: v.git_repo,
                 remote_urls: v.remotes,
+                user_uuid: config.userUuid,
                 branch: null as any,
                 trackedFiles: null as any
               })
@@ -156,16 +164,16 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
                   return getConnection().then(s => {
                     doWrite(s, {
                       type: event === 'change' ? 'change' : 'read',
-                      reqUuid: uuid.v4(),
                       val: {
                         repo: i.git_repo,
                         repo_remotes: v.remotes,
+                        user_uuid: config.userUuid,
                         file: fullPath,
                         user_email: 'alex@oresoftware.com',
                         user_name: 'alex'
                       }
                     });
-                  });
+                  });  //
                 });
 
             });
@@ -181,6 +189,7 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
                 repo: i.git_repo,
                 repo_remotes: [], // TODO fill this in
                 file: fullPath,
+                user_uuid: config.userUuid,
                 user_email: 'alex@oresoftware.com',
                 user_name: 'alex'
               }
@@ -223,8 +232,7 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
 
           try {
             var stats = fs.statSync(d.stdout);
-          }
-          catch (err) {
+          } catch (err) {
             log.error('8781b643-b682-4e0b-a29b-931ce7df7376: Could not stat this path:', d.stdout);
             return;
           }
@@ -241,6 +249,7 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
               val: {
                 repo: i.git_repo,
                 file: fullPath,
+                user_uuid: config.userUuid,
                 repo_remotes: [], // TODO fill this in
                 user_email: 'alex@oresoftware.com',
                 user_name: 'alex'

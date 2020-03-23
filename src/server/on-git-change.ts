@@ -29,7 +29,7 @@ export const getGitRepoIdFromURL = (urls: Array<string>): string | null => {
   return null;
 };
 
-export const onGitChange = (p: GitPayload, cb: ResultCallback) => {
+export const onGitChange = (p: GitPayload, userUuid: string, cb: ResultCallback) => {
 
   const urls = new Set(flattenDeep([p.remote_urls]).filter(Boolean));
 

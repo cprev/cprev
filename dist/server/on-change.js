@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const cache_1 = require("./cache");
 const on_git_change_1 = require("./on-git-change");
-function onChange(p, cb) {
+function onChange(p, userUuid, cb) {
     const repoId = on_git_change_1.getGitRepoIdFromURL(p.repo_remotes);
     if (!repoId) {
         return cb({
@@ -17,7 +17,6 @@ function onChange(p, cb) {
             files: {}
         };
     }
-    const userEmail = p.user_email;
     const repo = cache_1.repos[repoId];
     if (!repo.files[p.file]) {
         repo.files[p.file] = [];
@@ -34,7 +33,7 @@ function onChange(p, cb) {
     }
     while (true) {
         const mostRecent = lst[lst.length - 1];
-        if (mostRecent && mostRecent.user_email === userEmail) {
+        if (mostRecent && mostRecent.user_uuid === userUuid) {
             lst.pop();
             continue;
         }
@@ -43,6 +42,7 @@ function onChange(p, cb) {
     const mostRecent = lst[lst.length - 1];
     lst.push({
         ...p,
+        user_uuid: userUuid,
         time: now
     });
     if (!mostRecent) {
@@ -50,7 +50,7 @@ function onChange(p, cb) {
             result: 'no conflicts'
         });
     }
-    if (mostRecent.user_email === userEmail) {
+    if (mostRecent.user_uuid === userUuid) {
         return cb({
             result: 'no conflicts'
         });
@@ -60,10 +60,10 @@ function onChange(p, cb) {
         if (a.length > 3) {
             return a;
         }
-        if (b.user_email === userEmail) {
+        if (b.user_uuid === userUuid) {
             return a;
         }
-        if (!set.has(b.user_email)) {
+        if (!set.has(b.user_uuid)) {
             a.push(b);
         }
         return a;

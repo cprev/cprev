@@ -11,6 +11,7 @@ export interface Repos {
 export interface CodeChange {
   user_name: string,
   user_email: string,
+  user_uuid: string,
   time: number
   file: string
 }
@@ -27,6 +28,7 @@ export interface SocketMessage {
   type: 'read' | 'change' | 'git',
   reqUuid?: string,
   resUuid?: string,
+  userUuid: string,
   val: ReadPayload | ChangePayload | GitPayload
 }
 
@@ -34,6 +36,7 @@ export interface ChangePayload {
   repo: string,
   repo_remotes: Array<string>,
   file: string,
+  user_uuid: string,
   user_name: string,
   user_email: string
 }
@@ -41,6 +44,7 @@ export interface ChangePayload {
 export interface GitPayload {
   repo_path: string,
   remote_urls: Array<string>,
+  user_uuid: string,
   // remote_urls: {
   //   [key: string]: boolean
   // },
@@ -54,6 +58,7 @@ export interface ReadPayload {
   repo: string,
   file: string,
   repo_remotes: Array<string>,
+  user_uuid: string,
   user_name: string,
   user_email: string
 }

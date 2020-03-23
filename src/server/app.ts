@@ -22,12 +22,13 @@ app.use(bodyParser.json());
 app.post('/read', (req,res) => {
 
   const b = req.body as ReadPayload;
+  const userUuid = b.user_uuid;
 
   if(!(b.repo && typeof b.repo === 'string')){
     return res.status(422).json({error:'The "repo" field must be a string.'});
   }
 
-  onRead(b, v => {
+  onRead(b, userUuid, v => {
     res.json(v);
   });
 
@@ -36,12 +37,13 @@ app.post('/read', (req,res) => {
 app.post('/change', (req,res) => {
 
   const b = req.body as ChangePayload;
+  const userUuid = b.user_uuid;
 
   if(!(b.repo && typeof b.repo === 'string')){
     return res.status(422).json({error:'The "repo" field must be a string.'});
   }
 
-  onChange(b, v => {
+  onChange(b, userUuid, v => {
     res.json(v);
   });
 

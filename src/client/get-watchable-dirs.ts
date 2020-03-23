@@ -116,7 +116,7 @@ export const getWatchableDirs = (
           if (stats && stats.isDirectory()) {
             isGitRepo = true;
             relevantGitRepo = potentialGitFolder
-          }
+          }  //
 
           getGitRemote(isGitRepo, (err, remotes) => {
 

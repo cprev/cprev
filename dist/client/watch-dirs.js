@@ -8,6 +8,7 @@ const path = require("path");
 const uuid = require("uuid");
 const agent_1 = require("./agent");
 const utils_1 = require("../utils");
+const _cprev_conf_js_1 = require("../.cprev.conf.js");
 const doWrite = (s, v) => {
     if (!s.writable) {
         bunion_1.default.warn('44558c07-2b13-4f9c-9f3c-7e524e11fe07: socket is not writable.');
@@ -21,6 +22,10 @@ const doWrite = (s, v) => {
         bunion_1.default.warn('refusing to write to socket since payload has resUuid property:', v);
         return;
     }
+    if (!v.reqUuid) {
+        v.reqUuid = uuid.v4();
+    }
+    v.userUuid = _cprev_conf_js_1.default.userUuid;
     bunion_1.default.info("fb224b51-bb55-45d3-aa46-8f3d2c6ce55d writing payload:", v);
     s.write(JSON.stringify(v) + '\n', 'utf8');
 };
@@ -106,6 +111,7 @@ exports.watchDirs = (dirs) => {
                         return updateForGit({
                             repo_path: v.git_repo,
                             remote_urls: v.remotes,
+                            user_uuid: _cprev_conf_js_1.default.userUuid,
                             branch: null,
                             trackedFiles: null
                         })
@@ -113,10 +119,10 @@ exports.watchDirs = (dirs) => {
                             return client_conn_1.getConnection().then(s => {
                                 doWrite(s, {
                                     type: event === 'change' ? 'change' : 'read',
-                                    reqUuid: uuid.v4(),
                                     val: {
                                         repo: i.git_repo,
                                         repo_remotes: v.remotes,
+                                        user_uuid: _cprev_conf_js_1.default.userUuid,
                                         file: fullPath,
                                         user_email: 'alex@oresoftware.com',
                                         user_name: 'alex'
@@ -135,6 +141,7 @@ exports.watchDirs = (dirs) => {
                                 repo: i.git_repo,
                                 repo_remotes: [],
                                 file: fullPath,
+                                user_uuid: _cprev_conf_js_1.default.userUuid,
                                 user_email: 'alex@oresoftware.com',
                                 user_name: 'alex'
                             }
@@ -183,6 +190,7 @@ exports.watchDirs = (dirs) => {
                             val: {
                                 repo: i.git_repo,
                                 file: fullPath,
+                                user_uuid: _cprev_conf_js_1.default.userUuid,
                                 repo_remotes: [],
                                 user_email: 'alex@oresoftware.com',
                                 user_name: 'alex'

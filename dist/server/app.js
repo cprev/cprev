@@ -14,19 +14,21 @@ exports.app = app;
 app.use(bodyParser.json());
 app.post('/read', (req, res) => {
     const b = req.body;
+    const userUuid = b.user_uuid;
     if (!(b.repo && typeof b.repo === 'string')) {
         return res.status(422).json({ error: 'The "repo" field must be a string.' });
     }
-    on_read_1.onRead(b, v => {
+    on_read_1.onRead(b, userUuid, v => {
         res.json(v);
     });
 });
 app.post('/change', (req, res) => {
     const b = req.body;
+    const userUuid = b.user_uuid;
     if (!(b.repo && typeof b.repo === 'string')) {
         return res.status(422).json({ error: 'The "repo" field must be a string.' });
     }
-    on_change_1.onChange(b, v => {
+    on_change_1.onChange(b, userUuid, v => {
         res.json(v);
     });
 });

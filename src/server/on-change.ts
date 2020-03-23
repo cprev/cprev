@@ -4,7 +4,7 @@ import {CodeChange, ChangePayload, ResultCallback} from "../types";
 import {repos} from "./cache";
 import {getGitRepoIdFromURL} from "./on-git-change";
 
-export function onChange(p: ChangePayload, cb: ResultCallback) {
+export function onChange(p: ChangePayload, userUuid: string, cb: ResultCallback) {
 
   const repoId = getGitRepoIdFromURL(p.repo_remotes);
 
@@ -23,7 +23,6 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
     };
   }
 
-  const userEmail = p.user_email;
   const repo = repos[repoId];    ////
 
   if (!repo.files[p.file]) {
@@ -47,7 +46,7 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
   while (true) {
     // we remove all existing changes from current user from the end of queue
     const mostRecent = lst[lst.length - 1];
-    if (mostRecent && mostRecent.user_email === userEmail) {
+    if (mostRecent && mostRecent.user_uuid === userUuid) {
       lst.pop();
       continue;
     }
@@ -58,6 +57,7 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
 
   lst.push({
     ...p,
+    user_uuid: userUuid,
     time: now
   });
 
@@ -67,7 +67,7 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
     });
   }
 
-  if (mostRecent.user_email === userEmail) {
+  if (mostRecent.user_uuid === userUuid) {
     // current user made the most recent change, so no conflicts
     return cb({
       result: 'no conflicts'
@@ -83,11 +83,11 @@ export function onChange(p: ChangePayload, cb: ResultCallback) {
       return a;
     }
 
-    if (b.user_email === userEmail) {
+    if (b.user_uuid === userUuid) {
       return a;
     }
 
-    if (!set.has(b.user_email)) {
+    if (!set.has(b.user_uuid)) {
       a.push(b);
     }
 

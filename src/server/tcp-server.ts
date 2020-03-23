@@ -63,8 +63,18 @@ export const tcpServer = net.createServer(s => {
 
     const reqId = d.reqUuid || null;
 
+    const userUuid = d.userUuid;
+
+    if(!userUuid){
+      return doWrite(s, reqId, {
+        result: 'error',
+        error: 'missing userUuid in request',
+        reqUuid: uuid.v4()
+      })
+    }
+
     if(d.type === 'git'){
-      return onGitChange(d.val as GitPayload, v => {
+      return onGitChange(d.val as GitPayload, userUuid, v => {
         doWrite(s, reqId, v);
       });
     }
@@ -77,13 +87,13 @@ export const tcpServer = net.createServer(s => {
     // }
 
     if (d.type === 'change') {
-      return onChange(d.val as ChangePayload, v => {
+      return onChange(d.val as ChangePayload, userUuid, v => {
         doWrite(s, reqId, v);
       });
     }
 
     if (d.type === 'read') {
-      return onRead(d.val as ReadPayload, v => {
+      return onRead(d.val as ReadPayload, userUuid, v => {
         doWrite(s, reqId, v);
       });
     }

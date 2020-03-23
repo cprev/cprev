@@ -5,6 +5,8 @@ const c = require("../constants");
 const bunion_1 = require("bunion");
 const agent_1 = require("./agent");
 const json_stream_parser_1 = require("@oresoftware/json-stream-parser");
+const notifier = require("node-notifier");
+const path = require('path');
 exports.getConnection = () => {
     return new Promise((resolve => {
         if (agent_1.cache.conn && agent_1.cache.conn.writable) {
@@ -25,12 +27,21 @@ const makeNewConnection = () => {
         host: c.tcpServerHost
     });
     conn.pipe(new json_stream_parser_1.default()).on('data', d => {
-        if (!d.resUuid) {
-            bunion_1.default.info('client conn data:', d);
+        bunion_1.default.info('client conn received data:', d);
+        if (!(d && typeof d === 'object')) {
+            bunion_1.default.warn('response data is not an object.');
             return;
         }
         if (agent_1.cache.resolutions.has(d.resUuid)) {
-            agent_1.cache.resolutions.get(d.resUuid)(d);
+            return agent_1.cache.resolutions.get(d.resUuid)(d);
+        }
+        if (d.result === 'conflicts') {
+            notifier.notify({
+                title: 'There are conflicts!',
+                message: 'There were conflicts!',
+            }, function (err, response) {
+                console.error('resp:', err, response);
+            });
         }
     });
     conn.once('connect', () => {

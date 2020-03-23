@@ -46,18 +46,26 @@ exports.tcpServer = net.createServer(s => {
     });
     s.pipe(new json_stream_parser_1.default()).on('data', (d) => {
         const reqId = d.reqUuid || null;
+        const userUuid = d.userUuid;
+        if (!userUuid) {
+            return doWrite(s, reqId, {
+                result: 'error',
+                error: 'missing userUuid in request',
+                reqUuid: uuid.v4()
+            });
+        }
         if (d.type === 'git') {
-            return on_git_change_1.onGitChange(d.val, v => {
+            return on_git_change_1.onGitChange(d.val, userUuid, v => {
                 doWrite(s, reqId, v);
             });
         }
         if (d.type === 'change') {
-            return on_change_1.onChange(d.val, v => {
+            return on_change_1.onChange(d.val, userUuid, v => {
                 doWrite(s, reqId, v);
             });
         }
         if (d.type === 'read') {
-            return on_read_1.onRead(d.val, v => {
+            return on_read_1.onRead(d.val, userUuid, v => {
                 doWrite(s, reqId, v);
             });
         }

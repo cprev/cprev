@@ -3,11 +3,14 @@ import * as c from "../constants";
 import log from "bunion";
 import {cache} from "./agent";
 import JSONParser from "@oresoftware/json-stream-parser";
+import notifier = require('node-notifier');
 
-export const getConnection = () : Promise<net.Socket> => {
+const path = require('path');
+
+export const getConnection = (): Promise<net.Socket> => {
   return new Promise((resolve => {
 
-    if(cache.conn && cache.conn.writable){
+    if (cache.conn && cache.conn.writable) {
       return resolve(cache.conn);
     }
 
@@ -19,7 +22,7 @@ export const getConnection = () : Promise<net.Socket> => {
 
 const makeNewConnection = () => {
 
-  if(cache.conn){
+  if (cache.conn) {
     cache.conn.removeAllListeners();
     cache.conn.destroy();
   }
@@ -30,12 +33,39 @@ const makeNewConnection = () => {
   });
 
   conn.pipe(new JSONParser()).on('data', d => {
-    if(!d.resUuid){
-      log.info('client conn data:', d);
+
+    // if(!d.resUuid){
+    //   log.info('client conn data:', d);
+    //   return;
+    // }
+
+
+    log.info('client conn received data:', d);
+
+    if (!(d && typeof d === 'object')) {
+      log.warn('response data is not an object.');
       return;
     }
-    if(cache.resolutions.has(d.resUuid)){
-      (cache.resolutions.get(d.resUuid) as any)(d);
+
+    if (cache.resolutions.has(d.resUuid)) {
+      return (cache.resolutions.get(d.resUuid) as any)(d);
+    }
+
+    if (d.result === 'conflicts') {
+
+      notifier.notify(
+        {
+          title: 'There are conflicts!',
+          message: 'There were conflicts!',
+          // icon: path.join(__dirname, 'coulson.jpg'), // Absolute path (doesn't work on balloons)
+          // sound: true, // Only Notification Center or Windows Toasters
+          // wait: true // Wait with callback, until user action is taken against notification, does not apply to Windows Toasters as they always wait or notify-send as it does not support the wait option
+        },
+        function (err, response) {
+          // Response is response from notification
+          console.error('resp:', err, response);
+        }
+      );
     }
   });
 
