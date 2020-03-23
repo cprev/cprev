@@ -72,6 +72,9 @@ export const watchDirs = (dirs: Array<WatchDir>) => {
   const timers = new Map();
 
   console.log('dirs.length:', dirs.length);
+  for(let v of dirs){
+    log.info(v);
+  }
 
   for (const i of dirs) {
 

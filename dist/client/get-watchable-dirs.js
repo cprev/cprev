@@ -33,7 +33,9 @@ exports.getWatchableDirs = (config, cb) => {
         throw 'Why call me twice?';
     }
     callable = false;
-    const paths = exports.flattenDeep([config.codeRoots]).map(v => path.resolve(v));
+    const paths = exports.flattenDeep([config.codeRoots])
+        .filter(Boolean)
+        .map(v => path.resolve(v));
     const uniquePaths = Array.from(new Set(paths));
     const q = async.queue((task, cb) => task(cb), 15);
     const alreadySeen = new Set();
@@ -60,10 +62,10 @@ exports.getWatchableDirs = (config, cb) => {
         q.push(cb => {
             fs.stat(dir, (err, stats) => {
                 if (err) {
-                    return cb(null);
+                    return cb(null, null);
                 }
                 if (!stats.isDirectory()) {
-                    return cb(null);
+                    return cb(null, null);
                 }
                 try {
                     var cprevjs = require(path.resolve(dir + '/.cprev.js'));
@@ -79,15 +81,15 @@ exports.getWatchableDirs = (config, cb) => {
                         isGitRepo = true;
                         relevantGitRepo = potentialGitFolder;
                     }
-                    exports.getGitRemote(isGitRepo, remotes => {
+                    exports.getGitRemote(isGitRepo, (err, remotes) => {
                         if (isWatchingNow) {
                             uniqueFolders.add({ dirpath: dir, git_repo: relevantGitRepo, git_remotes: remotes });
                         }
                         fs.readdir(dir, (err, results) => {
-                            cb(null);
+                            cb(null, null);
                             if (err) {
                                 bunion_1.default.warn('bb97184f-4a07-4acd-b7bc-59dc8e5fb0e4:', err);
-                                return cb(null);
+                                return cb(null, null);
                             }
                             for (const v of results) {
                                 goThroughDir(path.resolve(dir + '/' + v), isWatchingNow, relevantGitRepo);

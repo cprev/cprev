@@ -52,6 +52,9 @@ exports.watchDirs = (dirs) => {
     callable = false;
     const timers = new Map();
     console.log('dirs.length:', dirs.length);
+    for (let v of dirs) {
+        bunion_1.default.info(v);
+    }
     for (const i of dirs) {
         let p = Promise.resolve();
         fs.watch(i.dirpath, (event, filename) => {
