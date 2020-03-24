@@ -4,6 +4,12 @@ import * as fs from 'fs';
 import * as cp from 'child_process';
 import log from "bunion";
 
+
+export const flattenDeep = (a: Array<any>): Array<any> => {
+  return a.reduce((acc, val) => Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val), []);
+};
+
+
 export const mkdirSafe = (dir: string) => {
   try{
     fs.mkdirSync(dir)

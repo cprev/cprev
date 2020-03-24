@@ -8,10 +8,8 @@ import log from "bunion";
 import * as fs from 'fs';
 import {dir} from "async";
 import * as cp from 'child_process';
+import {flattenDeep} from "../utils";
 
-export const flattenDeep = (a: Array<any>): Array<any> => {
-  return a.reduce((acc, val) => Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val), []);
-};
 
 export type EVCb<T, E = any> = (err: E, val: T) => void;
 

@@ -12,7 +12,7 @@ if (require.main === module) {
     process.exit(1);
 }
 exports.connections = new Set();
-const doWrite = (s, originalReqId, v) => {
+const doWrite = (s, originalReqId, userUuid, v) => {
     if (!s.writable) {
         bunion_1.default.warn('bae5c25d-60c6-4dd5-91af-d993142199ae: socket is not writable.');
         return;
@@ -25,7 +25,7 @@ const doWrite = (s, originalReqId, v) => {
         bunion_1.default.warn('refusing to write to socket since payload has resUuid property:', v);
         return;
     }
-    bunion_1.default.info("5897e002-6690-42b3-8fa3-fa5ec7929541 writing payload:", v);
+    bunion_1.default.info(`5897e002-6690-42b3-8fa3-fa5ec7929541 writing payload to client ('${userUuid}'):`, v);
     v.resUuid = originalReqId || null;
     s.write(JSON.stringify(v) + '\n', 'utf8');
 };
@@ -48,7 +48,7 @@ exports.tcpServer = net.createServer(s => {
         const reqId = d.reqUuid || null;
         const userUuid = d.userUuid;
         if (!userUuid) {
-            return doWrite(s, reqId, {
+            return doWrite(s, reqId, null, {
                 result: 'error',
                 error: 'missing userUuid in request',
                 reqUuid: uuid.v4()
@@ -56,21 +56,21 @@ exports.tcpServer = net.createServer(s => {
         }
         if (d.type === 'git') {
             return on_git_change_1.onGitChange(d.val, userUuid, v => {
-                doWrite(s, reqId, v);
+                doWrite(s, reqId, userUuid, v);
             });
         }
         if (d.type === 'change') {
             return on_change_1.onChange(d.val, userUuid, v => {
-                doWrite(s, reqId, v);
+                doWrite(s, reqId, userUuid, v);
             });
         }
         if (d.type === 'read') {
             return on_read_1.onRead(d.val, userUuid, v => {
-                doWrite(s, reqId, v);
+                doWrite(s, reqId, userUuid, v);
             });
         }
         bunion_1.default.error('e0a00403-74b0-4fc9-bf94-a305bef71c68: no task matched type:', d.type);
-        doWrite(s, reqId, {
+        doWrite(s, reqId, userUuid, {
             errId: 'd2fd1c06-66c4-4b74-b56a-e11eac1a85ce',
             reqUuid: uuid.v4(),
             error: `no task matched type: '${d.type}'`

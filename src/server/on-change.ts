@@ -77,8 +77,12 @@ export function onChange(p: ChangePayload, userUuid: string, cb: ResultCallback)
 
   if (mostRecent.user_uuid === userUuid) {
     // current user made the most recent change, so no conflicts
+    // this should never happen
+    log.error('this should never happen - matching user was still in the list')
     return cb({
-      result: 'no conflicts'
+      // result: 'no conflicts'
+      result: 'error',
+      error: 'wrong user was found'
     });
   }
 

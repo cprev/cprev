@@ -5,9 +5,7 @@ const path = require("path");
 const bunion_1 = require("bunion");
 const fs = require("fs");
 const cp = require("child_process");
-exports.flattenDeep = (a) => {
-    return a.reduce((acc, val) => Array.isArray(val) ? acc.concat(exports.flattenDeep(val)) : acc.concat(val), []);
-};
+const utils_1 = require("../utils");
 exports.getGitRemote = (isGitRepo, cb) => {
     const remotes = [];
     if (!isGitRepo) {
@@ -27,7 +25,7 @@ exports.getGitRemote = (isGitRepo, cb) => {
     });
 };
 exports.getWatchableDirs = (searchDirs, ignorePathsRegex, cb) => {
-    const paths = exports.flattenDeep([searchDirs])
+    const paths = utils_1.flattenDeep([searchDirs])
         .filter(Boolean)
         .map(v => path.resolve(v));
     const uniquePaths = Array.from(new Set(paths));

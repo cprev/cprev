@@ -10,6 +10,7 @@ if(!userUuid){
 export default {
   userUuid,
   codeRoots: [
+    `${process.env.cprev_test_folder}`,
     `${process.env.HOME}/codes`,
     `${process.env.HOME}/go/src/github.com/channelmeter`
   ]

@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const cp = require("child_process");
 const bunion_1 = require("bunion");
+exports.flattenDeep = (a) => {
+    return a.reduce((acc, val) => Array.isArray(val) ? acc.concat(exports.flattenDeep(val)) : acc.concat(val), []);
+};
 exports.mkdirSafe = (dir) => {
     try {
         fs.mkdirSync(dir);

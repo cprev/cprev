@@ -1,12 +1,12 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_watchable_dirs_1 = require("../client/get-watchable-dirs");
+const utils_1 = require("../utils");
 const bunion_1 = require("bunion");
 const uuid = require("uuid");
 exports.repoIdToRemoteURL = new Map();
 exports.remoteURLToRepoId = new Map();
 exports.getGitRepoIdFromURL = (urls) => {
-    for (const u of get_watchable_dirs_1.flattenDeep([urls]).filter(Boolean)) {
+    for (const u of utils_1.flattenDeep([urls]).filter(Boolean)) {
         if (exports.remoteURLToRepoId.has(u)) {
             return exports.remoteURLToRepoId.get(u).id;
         }
@@ -14,7 +14,7 @@ exports.getGitRepoIdFromURL = (urls) => {
     return null;
 };
 exports.onGitChange = (p, userUuid, cb) => {
-    const urls = new Set(get_watchable_dirs_1.flattenDeep([p.remote_urls]).filter(Boolean));
+    const urls = new Set(utils_1.flattenDeep([p.remote_urls]).filter(Boolean));
     let repoId = '';
     for (const u of urls) {
         if (exports.remoteURLToRepoId.has(u)) {

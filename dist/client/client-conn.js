@@ -7,6 +7,7 @@ const agent_1 = require("./agent");
 const json_stream_parser_1 = require("@oresoftware/json-stream-parser");
 const notifier = require("node-notifier");
 const path = require('path');
+const _cprev_conf_1 = require("../.cprev.conf");
 exports.getConnection = () => {
     return new Promise((resolve => {
         if (agent_1.cache.conn && agent_1.cache.conn.writable) {
@@ -24,10 +25,10 @@ const makeNewConnection = () => {
     }
     const conn = agent_1.cache.conn = net.createConnection({
         port: c.tcpServerPort,
-        host: 'alex.local' || c.tcpServerHost
+        host: c.tcpServerHost
     });
     conn.pipe(new json_stream_parser_1.default()).on('data', d => {
-        bunion_1.default.info('client conn received data:', d);
+        bunion_1.default.info(`client conn (for user id: '${_cprev_conf_1.default.userUuid}') received data:`, d);
         if (!(d && typeof d === 'object')) {
             bunion_1.default.warn('response data is not an object.');
             return;
