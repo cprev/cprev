@@ -11,6 +11,6 @@ const s = conf
   .replace('{{machineUuid}}', uuid.v4())
   .replace('{{userUuid}}', uuid.v4());
 
-const goto = path.resolve(process.env.HOME + '/.cprev/conf/cprev.conf.js');
-fs.writeFileSync(goto, s);
-fs.chmodSync(goto, '444');
+const confPath = path.resolve(process.env.HOME + '/.cprev/conf/cprev.conf.js');
+fs.writeFileSync(confPath, s);
+fs.chmodSync(confPath, '444');
