@@ -7,6 +7,8 @@ import notifier = require('node-notifier');
 
 const path = require('path');
 
+import config from '../.cprev.conf'
+
 export const getConnection = (): Promise<net.Socket> => {
   return new Promise((resolve => {
 
@@ -40,7 +42,7 @@ const makeNewConnection = () => {
     // }
 
 
-    log.info('client conn received data:', d);
+    log.info(`client conn (for user id: '${config.userUuid}') received data:`, d);
 
     if (!(d && typeof d === 'object')) {
       log.warn('response data is not an object.');

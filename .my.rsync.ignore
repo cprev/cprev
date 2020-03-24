@@ -1,0 +1,23 @@
+# folders
+src
+node_modules
+scripts
+build
+test
+docker
+install
+
+# dot folders
+.git
+.circleci
+.idea
+.vscode
+
+# dot files
+.editorconfig
+.npmignore
+.npmrc
+.travis.yml
+
+# files
+install.sh

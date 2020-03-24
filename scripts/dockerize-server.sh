@@ -72,8 +72,8 @@ curr_uuid="$(uuidgen)"
 
 (
   rm -rf build/tmp
-  rsync -r  --exclude='.git' --exclude='node_modules' --exclude='src' --exclude='.circleci' ./ build/tmp
-  rsync -r  --exclude='.git' --exclude='node_modules' --exclude='src' --exclude='.circleci' ./docker/agent/ build/tmp
+  rsync -r  --exclude-from='.my.rsync.ignore' ./ build/tmp
+  rsync -r  --exclude-from='.my.rsync.ignore'  ./docker/agent/ build/tmp
   ls -a build/tmp
   cd build/tmp
   docker build -t "cprev-agent:$curr_uuid" .
@@ -107,7 +107,12 @@ sleep 8;
 
 echo 'running the touch..';
 docker exec -d 'cprev-agent-1' touch /app/entrypoint.sh
+
+sleep 5;
 docker exec -d 'cprev-agent-2' touch /app/entrypoint.sh
+
+sleep 5;
+docker exec -d 'cprev-agent-1' touch /app/entrypoint.sh
 
 sleep 6;
 kill -9 "$kill_pid"

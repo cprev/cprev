@@ -55,8 +55,10 @@ function onChange(p, userUuid, cb) {
         });
     }
     if (mostRecent.user_uuid === userUuid) {
+        bunion_1.default.error('this should never happen - matching user was still in the list');
         return cb({
-            result: 'no conflicts'
+            result: 'error',
+            error: 'wrong user was found'
         });
     }
     const set = new Set();
