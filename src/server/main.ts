@@ -12,7 +12,7 @@ import {app} from "./app";
 import {tcpServer} from "./tcp-server";
 
 const tcps = tcpServer.listen(c.tcpServerPort, c.tcpServerHost, () => {
-  log.info('tcp server listening on port:', c.tcpServerPort);
+  log.info('tcp server listening on port:', c.tcpServerHost, c.tcpServerPort);
 });
 
 tcps.on('error', e => {
