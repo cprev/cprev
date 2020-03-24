@@ -13,7 +13,7 @@ import {tcpServer} from "./tcp-server";
 
 
 const tcps = tcpServer.listen(c.tcpServerPort, c.tcpServerHost, () => {
-  log.info('tcp server listening on port:', c.tcpServerPort);
+  log.info('tcp server listening on port:', c.tcpServerHost, c.tcpServerPort);
 });
 
 tcps.on('error', e => {
@@ -22,7 +22,7 @@ tcps.on('error', e => {
 
 
 const s = app.listen(c.httpServerPort, '0.0.0.0',() => {
-  log.info('server listening on port:', c.httpServerPort);
+  log.info('server listening on port:', c.httpServerHost, c.httpServerPort);
 });
 
 process.once('SIGTERM', () => {
