@@ -1,0 +1,7 @@
+node_modules
+src/server
+.circleci
+.git
+.gitignore
+.npmignore
+.gitattributes

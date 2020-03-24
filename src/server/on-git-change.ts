@@ -1,7 +1,7 @@
 'use strict';
 
 import {ChangePayload, GitPayload, ResultCallback} from "../types";
-import {flattenDeep} from "../client/get-watchable-dirs";
+import {flattenDeep} from "../utils";
 import log from "bunion";
 import * as uuid from 'uuid';
 // export const remoteURLToRepoPath = new Map<string, { pth: string }>();

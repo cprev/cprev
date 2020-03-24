@@ -29,7 +29,7 @@ const makeNewConnection = () => {
 
   const conn = cache.conn = net.createConnection({
     port: c.tcpServerPort,
-    host: 'alex.local' || c.tcpServerHost
+    host: c.tcpServerHost
   });
 
   conn.pipe(new JSONParser()).on('data', d => {

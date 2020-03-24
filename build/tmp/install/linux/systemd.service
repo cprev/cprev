@@ -1,0 +1,15 @@
+
+[Unit]
+Description=cprev agent
+After=network.target
+StartLimitIntervalSec=2
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=oleg
+ExecStart=/home/oleg/.local/bin/cprev-safe-start
+
+[Install]
+WantedBy=multi-user.target
