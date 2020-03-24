@@ -61,14 +61,17 @@ curr_uuid="$(uuidgen)"
 
 docker build -t "cprev-server:$curr_uuid" .
 
-rm -rf build/tmp
 
-rsync -r  --exclude='.git' --exclude='node_modules' --exclude='src' --exclude='.circleci' ./ build/tmp
-rsync -r  --exclude='.git' --exclude='node_modules' --exclude='src' --exclude='.circleci' ./assets/agent/ build/tmp
 
-ls -a build/tmp
+
+
+
 
 (
+  rm -rf build/tmp
+  rsync -r  --exclude='.git' --exclude='node_modules' --exclude='src' --exclude='.circleci' ./ build/tmp
+  rsync -r  --exclude='.git' --exclude='node_modules' --exclude='src' --exclude='.circleci' ./docker/agent/ build/tmp
+  ls -a build/tmp
   cd build/tmp
   docker build -t "cprev-agent:$curr_uuid" .
 )
