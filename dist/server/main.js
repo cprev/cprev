@@ -13,8 +13,8 @@ const tcps = tcp_server_1.tcpServer.listen(c.tcpServerPort, c.tcpServerHost, () 
 tcps.on('error', e => {
     bunion_1.default.warn('eb801985-e0bd-41e3-880b-fa9a8a75b4db: tcp server error:', e);
 });
-const s = app_1.app.listen(c.httpServerPort, '0.0.0.0', () => {
-    bunion_1.default.info('server listening on port:', c.httpServerPort);
+const s = app_1.app.listen(c.httpServerPort, c.httpServerHost, () => {
+    bunion_1.default.info('server listening on port:', c.httpServerHost, c.httpServerPort);
 });
 process.once('SIGTERM', () => {
     setTimeout(() => {

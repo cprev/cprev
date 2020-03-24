@@ -20,7 +20,6 @@ export function onRead(p: ChangePayload, userUuid: string, cb: ResultCallback) {
   log.info('the repo id:', repoId);
   log.info('the user id:', userUuid);
 
-
   if (!repos[repoId]) {
     repos[repoId] = {
       repoId,
@@ -28,7 +27,6 @@ export function onRead(p: ChangePayload, userUuid: string, cb: ResultCallback) {
       files: {}
     };
   }
-
 
   const repo = repos[repoId];
 

@@ -24,7 +24,7 @@ const makeNewConnection = () => {
     }
     const conn = agent_1.cache.conn = net.createConnection({
         port: c.tcpServerPort,
-        host: c.tcpServerHost
+        host: 'alex.local' || c.tcpServerHost
     });
     conn.pipe(new json_stream_parser_1.default()).on('data', d => {
         bunion_1.default.info('client conn received data:', d);

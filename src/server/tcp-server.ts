@@ -70,7 +70,7 @@ export const tcpServer = net.createServer(s => {
         result: 'error',
         error: 'missing userUuid in request',
         reqUuid: uuid.v4()
-      })
+      });
     }
 
     if(d.type === 'git'){
