@@ -59,12 +59,15 @@ curr_uuid="$(uuidgen)"
  docker rm 'cprev-agent-2' || echo
 ) &
 
-docker build -t "cprev-server:$curr_uuid" .
 
-
-
-
-
+(
+  rm -rf build/tmp
+  rsync -r  --exclude='.git' --exclude='node_modules' --exclude='src' --exclude='.circleci' ./ build/tmp
+  rsync -r  --exclude='.git' --exclude='node_modules' --exclude='src' --exclude='.circleci' ./docker/server/ build/tmp
+  ls -a build/tmp
+  cd build/tmp
+  docker build -t "cprev-server:$curr_uuid" .
+)
 
 
 (
@@ -98,9 +101,13 @@ docker run --rm -d -e cprev_host='0.0.0.0' -e cprev_test_folder='/app' \
     docker logs -f cprev-agent-2 &
 ) | cat &
 
+kill_pid="$?"
 
 sleep 8;
 
 echo 'running the touch..';
 docker exec -d 'cprev-agent-1' touch /app/entrypoint.sh
 docker exec -d 'cprev-agent-2' touch /app/entrypoint.sh
+
+sleep 6;
+kill -9 "$kill_pid"
