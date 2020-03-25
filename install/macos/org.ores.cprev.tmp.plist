@@ -4,12 +4,11 @@
 <dict>
         <key>Label</key>
         <string>org.ores.cprev</string>
-        <key>Program</key>
-        <string>/Users/alex/.local/bin/cprev-safe-start</string>
         <key>ProgramArguments</key>
          <array>
           <string>/Users/alex/.local/bin/cprev-safe-start</string>
           <string>--foo</string>
+          <string>bar</string>
          </array>
          <key>RunAtLoad</key>
           <true/>
@@ -19,8 +18,8 @@
               <true/>
           </dict>
         <key>StandardErrorPath</key>
-          <string>/tmp/cprev.stderr.log</string>
-          <key>StandardOutPath</key>
-          <string>/tmp/cprev.stdout.log</string>
+        <string>/tmp/cprev.stderr.log</string>
+        <key>StandardOutPath</key>
+        <string>/tmp/cprev.stdout.log</string>
 </dict>
 </plist>

@@ -25,6 +25,9 @@ mkdir -p "$HOME/.cprev/sockets"
   ln -sf "$PWD" "$HOME/.cprev/lib"
 )
 
+
+mkdir -p "$HOME/.local/bin"
+
 ln -sf "$HOME/.cprev/lib/dist/client/main.js" "$HOME/.local/bin/cprev-agent"
 chmod +x "$HOME/.local/bin/cprev-agent"
 

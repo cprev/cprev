@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 
-set -eo pipefail;
+
+set +eo pipefail;
+
+export cprev_user_uuid=333
 
 (
-    current_node_version="$(node --version 2> /dev/null)"
+    set -e;
+
+    command -v node || echo 'no node installed'
+    command -v nvm || echo 'no nvm installed'
+
+    current_node_version="$(node --version 2> /dev/null || echo)"
 
     if [[ "$current_node_version" != 'v13.11'* ]]; then
       echo 'Installing nvm in order to install nodejs...'
@@ -14,8 +22,8 @@ set -eo pipefail;
          exit 1;
       fi
 
-      export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 
        echo 'Installing nodejs v13.11 via nvm...'
        nvm install '13.11'   # &&   nvm use '13.11'
@@ -24,3 +32,8 @@ set -eo pipefail;
 
     node "$HOME/.local/bin/cprev-agent"
 )
+
+exit_code="$?"
+
+echo "cprev agent is exiting with code: '$exit_code'"
+exit "$exit_code";

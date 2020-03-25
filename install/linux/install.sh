@@ -23,15 +23,17 @@ if [[ "cprev_allow_reinstall" == 'yes' ]]; then
 fi
 
 rm -rf "$HOME/.cprev"
-
 mkdir -p "$HOME/.cprev/conf"
 mkdir -p "$HOME/.cprev/lib"
 mkdir -p "$HOME/.cprev/sockets"
+mkdir -p "$HOME/.local/bin"
 
 cd "$HOME/.cprev"
 git clone 'git@github.com:cprev/cprev.git' "$HOME/.cprev/lib"
 
 cd "$HOME/.cprev/lib" && git checkout master
+
+
 
 ln -sf "$HOME/.cprev/lib/dist/client/main.js" "$HOME/.local/bin/cprev-agent"
 chmod +x "$HOME/.local/bin/cprev-agent"
