@@ -18,3 +18,6 @@ w.on('change', (a,b,c) => {
 w.on('read', (a,b,c) => {
   console.log('read:',{a,b,c});
 });
+
+
+console.log(Array.from(undefined));

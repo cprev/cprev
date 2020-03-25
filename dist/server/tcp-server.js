@@ -29,20 +29,33 @@ const doWrite = (s, originalReqId, userUuid, v) => {
     v.resUuid = originalReqId || null;
     s.write(JSON.stringify(v) + '\n', 'utf8');
 };
+exports.connectionsByUserUuid = new Map();
+exports.socketToUserUuid = new Map();
+const cleanUpConnection = (s) => {
+    exports.connections.delete(s);
+    const userUuids = exports.socketToUserUuid.get(s);
+    if (!userUuids) {
+        return;
+    }
+    exports.socketToUserUuid.delete(s);
+    for (const c of userUuids) {
+        exports.connectionsByUserUuid.delete(c);
+    }
+};
 exports.tcpServer = net.createServer(s => {
     exports.connections.add(s);
     bunion_1.default.info('db8e1576-91d2-43f6-9285-6ff35d0f864a: new connection.');
     s.once('error', e => {
         bunion_1.default.error('6f955362-4aec-4841-ba57-c98cd30cd2b5:', 'socket conn error: ', e);
-        exports.connections.delete(s);
+        cleanUpConnection(s);
     });
     s.once('disconnect', () => {
         bunion_1.default.info('6f955362-4aec-4841-ba57-c98cd30cd2b5:', 'connection disconnected.');
-        exports.connections.delete(s);
+        cleanUpConnection(s);
     });
     s.once('end', () => {
         bunion_1.default.info('c25f6ed5-a3c6-494e-9493-c2a945bac335:', 'connection ended.');
-        exports.connections.delete(s);
+        cleanUpConnection(s);
     });
     s.pipe(new json_stream_parser_1.default()).on('data', (d) => {
         const reqId = d.reqUuid || null;
@@ -53,6 +66,16 @@ exports.tcpServer = net.createServer(s => {
                 error: 'missing userUuid in request',
                 reqUuid: uuid.v4()
             });
+        }
+        {
+            if (!exports.socketToUserUuid.has(s)) {
+                exports.socketToUserUuid.set(s, new Set());
+            }
+            exports.socketToUserUuid.get(s).add(userUuid);
+            if (!exports.connectionsByUserUuid.has(userUuid)) {
+                exports.connectionsByUserUuid.set(userUuid, new Set());
+            }
+            exports.connectionsByUserUuid.get(userUuid).add(s);
         }
         if (d.type === 'git') {
             return on_git_change_1.onGitChange(d.val, userUuid, v => {

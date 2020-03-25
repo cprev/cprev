@@ -35,6 +35,22 @@ const doWrite = (s: net.Socket, originalReqId: string | null, userUuid: string, 
 
 };
 
+export const connectionsByUserUuid = new Map<string, Set<net.Socket>>();
+export const socketToUserUuid = new Map<net.Socket, Set<string>>();
+
+const cleanUpConnection = (s: net.Socket) => {
+  connections.delete(s);
+  const userUuids = socketToUserUuid.get(s);
+  if(!userUuids){
+    return;
+  }
+  socketToUserUuid.delete(s);
+  for(const c of userUuids){
+    connectionsByUserUuid.delete(c);
+  }
+
+};
+
 export const tcpServer = net.createServer(s => {
 
   connections.add(s);
@@ -44,17 +60,17 @@ export const tcpServer = net.createServer(s => {
   s.once('error', e => {
     log.error('6f955362-4aec-4841-ba57-c98cd30cd2b5:', 'socket conn error: ', e);
     // s.removeAllListeners();
-    connections.delete(s);
+    cleanUpConnection(s);
   });
 
   s.once('disconnect', () => {
     log.info('6f955362-4aec-4841-ba57-c98cd30cd2b5:', 'connection disconnected.');
-    connections.delete(s);
+    cleanUpConnection(s);
   });
 
   s.once('end', () => {
     log.info('c25f6ed5-a3c6-494e-9493-c2a945bac335:', 'connection ended.');
-    connections.delete(s);
+    cleanUpConnection(s);
   });
 
 
@@ -72,6 +88,23 @@ export const tcpServer = net.createServer(s => {
         error: 'missing userUuid in request',
         reqUuid: uuid.v4()
       });
+    }
+
+    {
+
+      // we store userid to socket map so that we can write a notification to a specific connected user
+      if(!socketToUserUuid.has(s)){
+        socketToUserUuid.set(s, new Set());
+      }
+
+      (socketToUserUuid.get(s) as any).add(userUuid);
+
+      if(!connectionsByUserUuid.has(userUuid)){
+        connectionsByUserUuid.set(userUuid, new Set());
+      }
+
+      (connectionsByUserUuid.get(userUuid) as any).add(s);
+
     }
 
     if(d.type === 'git'){
