@@ -7,12 +7,13 @@ run_command(){
   file_to_run="$1";
 
   if command -v curl; then
-     echo 'this is curl'
+     curl -o- "$" | bash
      exit;
   fi
 
   if command -v wget; then
      echo 'this is wget'
+     wget -qO- "$1" | bash
      exit;
   fi
 
@@ -20,12 +21,17 @@ run_command(){
   exit 1;
 }
 
+base_url='https://raw.githubusercontent.com/cprev/cprev/master/install'
+
+
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
+       run_command "$base_url/linux/install.sh"
        exit;
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
         # Mac OSX
+       run_command "$base_url/macos/install.sh"
        exit;
 fi
 
