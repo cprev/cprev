@@ -4,6 +4,8 @@ import * as path from "path";
 export const localAgentSocketFileName = 'agent.sock';
 export const localAgentSocketPath = path.resolve(`${process.env.HOME}/.cprev/sockets/${localAgentSocketFileName}`);
 
+// export const httpServerHost = 'localhost' || '0.0.0.0';
+// export const tcpServerHost = 'localhost' || '0.0.0.0';
 export const httpServerHost = process.env.cprev_host || '0.0.0.0';
 export const tcpServerHost = process.env.cprev_host || '0.0.0.0';
 export const httpServerPort = 3045;
@@ -21,10 +23,3 @@ export const ignoredPaths = [
 
 export const ignorePathsRegex = ignoredPaths.map(v => new RegExp(v, 'i'));
 
-//
-//
-//
-//
-//
-//
-//
