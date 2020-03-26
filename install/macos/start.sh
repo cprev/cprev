@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 set +eo pipefail;
 
 export cprev_user_uuid=333
