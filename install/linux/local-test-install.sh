@@ -13,6 +13,8 @@ rm -rf "$HOME/.cprev"
 mkdir -p "$HOME/.cprev/conf"
 mkdir -p "$HOME/.cprev/sockets"
 
+mkdir -p "$HOME/.config/systemd/user"
+
 
 (
   cd "$(dirname "$(dirname "$(dirname "$BASH_SOURCE")")")";
@@ -35,11 +37,21 @@ ln -sf "$HOME/.cprev/lib/install/linux/start.sh" "$HOME/.local/bin/cprev-safe-st
 chmod +x "$HOME/.local/bin/cprev-safe-start"
 
 
-sudo rsync "$PWD/systemd.service" "/etc/systemd/system/cprev.agent.service"
+#sudo rsync "$PWD/systemd.service" "/etc/systemd/system/cprev.agent.service"
+rsync "$PWD/systemd.service" "$HOME/.config/systemd/user/cprev.agent.service"
+
 
 node write-config.js
 
+systemctl --user daemon-reload
+systemctl --user enable cprev.agent.service
+systemctl --user restart cprev.agent.service
+
 echo 'installed successfully (local installation).';
 
-echo 'To restart the systemd service, use:'
-echo 'systemctl restart cprev.agent.service'
+echo 'Useful systemd commands for this service, are:'
+echo
+echo 'systemctl --user daemon-reload'
+echo 'systemctl --user restart cprev.agent.service'
+echo 'systemctl --user enable cprev.agent.service'
+echo 'journalctl -f --user -u cprev.agent.service'
