@@ -7,10 +7,9 @@ StartLimitIntervalSec=2
 [Service]
 Type=simple
 Restart=always
-RestartSec=5
+RestartSec=15
 User=oleg
-ExecStartOriginal=/home/oleg/.local/bin/cprev-safe-start
-ExecStart=/bin/bash -c '$HOME/.local/bin/cprev-safe-start'
+ExecStart=/home/oleg/.local/bin/cprev-safe-start
 
 [Install]
 WantedBy=multi-user.target
