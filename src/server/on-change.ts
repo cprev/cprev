@@ -37,7 +37,6 @@ export function onChange(p: ChangePayload, userUuid: string, cb: ResultCallback)
 
   log.info('current event list:', lst);
 
-
   const now = Date.now();
 
   while (true) {
