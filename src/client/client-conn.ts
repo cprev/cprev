@@ -1,3 +1,4 @@
+'use strict';
 import * as net from "net";
 import * as c from "../constants";
 import log from "bunion";
@@ -5,7 +6,6 @@ import {cache} from "./agent";
 import JSONParser from "@oresoftware/json-stream-parser";
 import notifier = require('node-notifier');
 
-const path = require('path');
 
 import config from '../.cprev.conf'
 

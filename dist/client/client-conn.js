@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
 const net = require("net");
 const c = require("../constants");
@@ -6,7 +6,6 @@ const bunion_1 = require("bunion");
 const agent_1 = require("./agent");
 const json_stream_parser_1 = require("@oresoftware/json-stream-parser");
 const notifier = require("node-notifier");
-const path = require('path');
 const _cprev_conf_1 = require("../.cprev.conf");
 exports.getConnection = () => {
     return new Promise((resolve => {
