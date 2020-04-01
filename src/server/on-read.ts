@@ -90,8 +90,6 @@ export function onRead(p: ChangePayload, userUuid: string, cb: ResultCallback) {
     });
   }
 
-  //////
-
   return cb({
     result: 'conflict',
     conflicts

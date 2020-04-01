@@ -46,3 +46,5 @@ echo 'installed successfully (local installation).';
 
 echo 'To restart the systemd service, use:'
 echo 'launchctl load "$HOME/Library/LaunchAgents/org.ores.cprev.plist"'
+
+# TODO: https://serverfault.com/questions/183589/how-do-i-activate-launchd-logging-on-os-x
