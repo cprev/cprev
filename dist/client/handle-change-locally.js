@@ -48,6 +48,9 @@ exports.handleLocalChange = (event, i, fullPath, filename) => {
                     if (authors.has(email)) {
                         return { code: 0 };
                     }
+                    if (authors.size > 3) {
+                        return { code: 0 };
+                    }
                     return utils_1.runGitDiffForCommit(v.git_repo, hash, filename);
                 })
                     .then(({ code }) => {

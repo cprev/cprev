@@ -65,23 +65,27 @@ export const handleLocalChange = (event: string, i: WatchDir, fullPath: string, 
 
           p = p.then(v => {
 
-            if (authors.has(email)) {
-              return {code: 0};
-            }
+              if (authors.has(email)) {
+                return {code: 0};
+              }
 
-            return runGitDiffForCommit(v.git_repo, hash, filename)
-          })
+              if (authors.size > 3) {
+                return {code: 0};
+              }
+
+              return runGitDiffForCommit(v.git_repo, hash, filename)
+            })
             .then(({code}) => {
-            if (code > 0) {
-              authors.add(email);
-            }
-          });
+              if (code > 0) {
+                authors.add(email);
+              }
+            });
 
         });
 
         k.once('exit', code => {
 
-          p.then(() =>{
+          p.then(() => {
             resolve();
           })
         });
