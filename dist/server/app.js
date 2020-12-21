@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.app = void 0;
 const express = require("express");
 const bodyParser = require("body-parser");
 const on_change_1 = require("./on-change");

@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.onRead = void 0;
 const cache_1 = require("./cache");
 const on_git_change_1 = require("./on-git-change");
 const bunion_1 = require("bunion");

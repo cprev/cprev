@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getConnection = void 0;
 const net = require("net");
 const c = require("../constants");
 const bunion_1 = require("bunion");

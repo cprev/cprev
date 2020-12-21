@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ignorePathsRegex = exports.ignoredPaths = exports.tcpServerPort = exports.httpServerPort = exports.tcpServerHost = exports.httpServerHost = exports.localAgentSocketPath = exports.localAgentSocketFileName = void 0;
 const path = require("path");
 exports.localAgentSocketFileName = 'agent.sock';
 exports.localAgentSocketPath = path.resolve(`${process.env.HOME}/.cprev/sockets/${exports.localAgentSocketFileName}`);

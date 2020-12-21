@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createParser = void 0;
 const stream = require("stream");
 exports.createParser = function () {
     let lastLineData = '';

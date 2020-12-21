@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getWatchableDirs = exports.getGitRemote = void 0;
 const async = require("async");
 const path = require("path");
 const bunion_1 = require("bunion");

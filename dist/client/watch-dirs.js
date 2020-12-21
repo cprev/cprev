@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.watchDirs = exports.dirToWatcher = exports.watchedDirs = void 0;
 const fs = require("fs");
 const bunion_1 = require("bunion");
 const path = require("path");

@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.tcpServer = exports.socketToUserUuid = exports.connectionsByUserUuid = exports.connections = void 0;
 const net = require("net");
 const json_stream_parser_1 = require("@oresoftware/json-stream-parser");
 const on_change_1 = require("./on-change");
