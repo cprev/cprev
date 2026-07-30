@@ -6,7 +6,7 @@ const json_stream_parser_1 = require("@oresoftware/json-stream-parser");
 const on_change_1 = require("./on-change");
 const on_read_1 = require("./on-read");
 const bunion_1 = require("bunion");
-const uuid = require("uuid");
+const random_uuid_1 = require("../random-uuid");
 const on_git_change_1 = require("./on-git-change");
 if (require.main === module) {
     bunion_1.default.error('757b18f0-9a5e-481b-91a8-9dee60df4ac0:', 'cannot run the file directly - use main.js.');
@@ -65,7 +65,7 @@ exports.tcpServer = net.createServer(s => {
             return doWrite(s, reqId, null, {
                 result: 'error',
                 error: 'missing userUuid in request',
-                reqUuid: uuid.v4()
+                reqUuid: random_uuid_1.randomUuid()
             });
         }
         {
@@ -96,7 +96,7 @@ exports.tcpServer = net.createServer(s => {
         bunion_1.default.error('e0a00403-74b0-4fc9-bf94-a305bef71c68: no task matched type:', d.type);
         doWrite(s, reqId, userUuid, {
             errId: 'd2fd1c06-66c4-4b74-b56a-e11eac1a85ce',
-            reqUuid: uuid.v4(),
+            reqUuid: random_uuid_1.randomUuid(),
             error: `no task matched type: '${d.type}'`
         });
     });

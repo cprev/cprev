@@ -9,7 +9,6 @@ import {ChangePayload, GitPayload, ReadPayload, SocketMessage, WatchDir} from ".
 import * as cp from 'child_process';
 import * as path from "path";
 import {dir} from "async";
-import * as uuid from 'uuid';
 import {cache} from "./agent";
 import {FSWatcher} from "fs";
 import {getGitRemotes, getGitRepoPath, hasGitGrandparent} from "../utils";

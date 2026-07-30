@@ -6,7 +6,7 @@ import {ChangePayload, GitPayload, ReadPayload, SocketMessage} from "../types";
 import {onChange} from "./on-change";
 import {onRead} from "./on-read";
 import log from 'bunion';
-import * as uuid from 'uuid';
+import {randomUuid} from "../random-uuid";
 import {onGitChange} from "./on-git-change";
 
 if (require.main === module) {
@@ -86,7 +86,7 @@ export const tcpServer = net.createServer(s => {
       return doWrite(s, reqId, null as any, {
         result: 'error',
         error: 'missing userUuid in request',
-        reqUuid: uuid.v4()
+        reqUuid: randomUuid()
       });
     }
 
@@ -116,7 +116,7 @@ export const tcpServer = net.createServer(s => {
     // if (!(d.val && d.val.repo_path && typeof d.val.repo_path === 'string')) {
     //   return doWrite(s, reqId, {
     //     error: 'missing repo',
-    //     reqUuid: uuid.v4()
+    //     reqUuid: randomUuid()
     //   });
     // }
 
@@ -136,11 +136,10 @@ export const tcpServer = net.createServer(s => {
 
     doWrite(s, reqId, userUuid, {
       errId: 'd2fd1c06-66c4-4b74-b56a-e11eac1a85ce',
-      reqUuid: uuid.v4(),
+      reqUuid: randomUuid(),
       error: `no task matched type: '${d.type}'`
     });
 
   });
 
 });
-

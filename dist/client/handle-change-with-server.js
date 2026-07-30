@@ -5,7 +5,7 @@ const utils_1 = require("../utils");
 const bunion_1 = require("bunion");
 const _cprev_conf_1 = require("../.cprev.conf");
 const client_conn_1 = require("./client-conn");
-const uuid = require("uuid");
+const random_uuid_1 = require("../random-uuid");
 const cp = require("child_process");
 const fs = require("fs");
 const agent_1 = require("./agent");
@@ -23,14 +23,14 @@ const doWrite = (s, v) => {
         return;
     }
     if (!v.reqUuid) {
-        v.reqUuid = uuid.v4();
+        v.reqUuid = random_uuid_1.randomUuid();
     }
     v.userUuid = _cprev_conf_1.default.userUuid;
     bunion_1.default.info("fb224b51-bb55-45d3-aa46-8f3d2c6ce55d writing payload:", v);
     s.write(JSON.stringify(v) + '\n', 'utf8');
 };
 const updateForGit = (p) => {
-    const id = uuid.v4();
+    const id = random_uuid_1.randomUuid();
     client_conn_1.getConnection().then(s => {
         doWrite(s, {
             type: 'git',
@@ -102,7 +102,7 @@ exports.handleChangeWithServer = (event, i, fullPath, filename) => {
         return client_conn_1.getConnection().then(v => {
             doWrite(v, {
                 type: event === 'change' ? 'change' : 'read',
-                reqUuid: uuid.v4(),
+                reqUuid: random_uuid_1.randomUuid(),
                 val: {
                     repo: i.git_repo,
                     repo_remotes: [],
@@ -152,7 +152,7 @@ exports.handleChangeWithServer = (event, i, fullPath, filename) => {
         client_conn_1.getConnection().then(v => {
             doWrite(v, {
                 type: event === 'change' ? 'change' : 'read',
-                reqUuid: uuid.v4(),
+                reqUuid: random_uuid_1.randomUuid(),
                 val: {
                     repo: i.git_repo,
                     file: fullPath,

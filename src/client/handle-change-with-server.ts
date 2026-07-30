@@ -2,7 +2,7 @@ import {getGitRemotes, getGitRepoPath} from "../utils";
 import log from "bunion";
 import config from "../.cprev.conf";
 import {getConnection} from "./client-conn";
-import * as uuid from "uuid";
+import {randomUuid} from "../random-uuid";
 import * as cp from "child_process";
 import * as fs from "fs";
 import * as path from "path";
@@ -28,7 +28,7 @@ const doWrite = (s: net.Socket, v: Partial<SocketMessage>) => {
   }
 
   if (!v.reqUuid) {
-    v.reqUuid = uuid.v4();
+    v.reqUuid = randomUuid();
   }
 
   v.userUuid = config.userUuid;
@@ -39,7 +39,7 @@ const doWrite = (s: net.Socket, v: Partial<SocketMessage>) => {
 
 const updateForGit = (p: GitPayload) => {
 
-  const id = uuid.v4();
+  const id = randomUuid();
 
   getConnection().then(s => {
     doWrite(s, {
@@ -129,7 +129,7 @@ export const handleChangeWithServer =
     return getConnection().then(v => {
       doWrite(v, {
         type: event === 'change' ? 'change' : 'read',
-        reqUuid: uuid.v4(),
+        reqUuid: randomUuid(),
         val: {
           repo: i.git_repo,
           repo_remotes: [], // TODO fill this in
@@ -191,7 +191,7 @@ export const handleChangeWithServer =
     getConnection().then(v => {
       doWrite(v, {
         type: event === 'change' ? 'change' : 'read',
-        reqUuid: uuid.v4(),
+        reqUuid: randomUuid(),
         val: {
           repo: i.git_repo,
           file: fullPath,

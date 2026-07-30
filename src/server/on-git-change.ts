@@ -3,7 +3,7 @@
 import {ChangePayload, GitPayload, ResultCallback} from "../types";
 import {flattenDeep} from "../utils";
 import log from "bunion";
-import * as uuid from 'uuid';
+import {randomUuid} from "../random-uuid";
 // export const remoteURLToRepoPath = new Map<string, { pth: string }>();
 // export const repoPathToRemoteURL = new Map<string, { url: string }>();
 // export const repoIdToRepoPath = new Map<string, { pth: string }>();
@@ -44,7 +44,7 @@ export const onGitChange = (p: GitPayload, userUuid: string, cb: ResultCallback)
   }
 
   if(!repoId){
-    repoId = uuid.v4();
+    repoId = randomUuid();
   }
 
   // repoPathToRepoId.set(p.repo_path, {id: repoId});

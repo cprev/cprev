@@ -9,4 +9,4 @@ import * as EE from 'events';
 import * as strm from "stream";
 
 
-log.info('your simple typescript test goes here.');
+console.log('your simple typescript test goes here.');

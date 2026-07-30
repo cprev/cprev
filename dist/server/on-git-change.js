@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.onGitChange = exports.getGitRepoIdFromURL = exports.remoteURLToRepoId = exports.repoIdToRemoteURL = void 0;
 const utils_1 = require("../utils");
 const bunion_1 = require("bunion");
-const uuid = require("uuid");
+const random_uuid_1 = require("../random-uuid");
 exports.repoIdToRemoteURL = new Map();
 exports.remoteURLToRepoId = new Map();
 exports.getGitRepoIdFromURL = (urls) => {
@@ -26,7 +26,7 @@ exports.onGitChange = (p, userUuid, cb) => {
         }
     }
     if (!repoId) {
-        repoId = uuid.v4();
+        repoId = random_uuid_1.randomUuid();
     }
     for (const u of urls) {
         exports.remoteURLToRepoId.set(u, { id: repoId });
