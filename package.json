@@ -34,7 +34,7 @@
     "@oresoftware/json-stream-parser": "0.0.124",
     "@oresoftware/linked-queue": "^0.1.107",
     "async": "^3.2.0",
-    "body-parser": "^1.19.0",
+    "body-parser": "^1.20.6",
     "bunion": "0.0.129",
     "express": "^4.17.1",
     "node-notifier": "^8.0.1",
